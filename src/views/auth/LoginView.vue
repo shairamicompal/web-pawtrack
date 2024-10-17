@@ -1,70 +1,52 @@
 <script setup>
-import { ref } from 'vue'
+import AppLayout from '@/components/layout/AppLayout.vue'
+import { useDisplay } from 'vuetify'
 
-const theme = ref('light')
-
-function onClick() {
-  theme.value = theme.value === 'light' ? 'dark' : 'light'
-}
+const { mobile } = useDisplay()
 </script>
 
 <template>
-  <v-responsive class="border rounded">
-    <v-app :theme="theme">
-      <v-app-bar class="px-3" color="purple-lighten-2">
-        <v-spacer></v-spacer>
-
-        <v-btn
-          :prepend-icon="theme === 'light' ? 'mdi-weather-sunny' : 'mdi-weather-night'"
-          text="Toggle Theme"
-          slim
-          @click="onClick"
-        ></v-btn>
-      </v-app-bar>
-
-      <v-main>
-        <v-container>
-          <v-row>
-            <v-col cols="12" md="6" class="mx-auto">
-              <v-card
+  <AppLayout>
+    <template #content>
+      <v-row>
+        <v-col cols="12" md="6" class="mx-auto pt-16">
+          <v-card class="mx-auto" elevation="24">
+            <v-card-title class="text-center">
+              <v-img
                 class="mx-auto"
-                prepend-icon="mdi-login"
-                subtitle="Login"
-              >
-                <template v-slot:title>
-                  <span class="font-weight-black">PawTrack</span>
-                </template>
+                src="/images/logo-favicon.jpg"
+                :width="mobile ? '75%' : '25%'"
+              ></v-img>
+              <h3 class="font-weight-black">PawTrack</h3>
+              <h6>Login Form</h6>
+            </v-card-title>
 
-                <v-card-text class="bg-surface-light pt-4">
-                  <v-form fast-fail @submit.prevent>
-                    <v-text-field label="Email" variant="outlined"></v-text-field>
+            <v-card-text class="bg-surface-light pt-4">
+              <v-divider class="my-5"></v-divider>
 
-                    <v-text-field
-                      label="Password"
-                      type="password"
-                      variant="outlined"
-                    ></v-text-field>
+              <v-form fast-fail @submit.prevent>
+                <v-text-field label="Email" variant="outlined"></v-text-field>
 
-                    <v-btn class="mt-2" type="submit" block>Submit</v-btn>
-                  </v-form>
+                <v-text-field label="Password" type="password" variant="outlined"></v-text-field>
 
-                  <!-- HR  -->
-                  <v-divider class="my-5"></v-divider>
+                <v-btn class="mt-2" type="submit" block color="primary" prepend-icon="mdi-login"
+                  >Login</v-btn
+                >
+              </v-form>
 
-                  <h5 class="text-center">
-                    Don't have account?
-                    <router-link class="text-primary" to="/register"
-                      >Click here to Register</router-link
-                    >
-                  </h5>
-                </v-card-text>
-              </v-card>
-            </v-col>
-          </v-row>
-        </v-container>
-      </v-main>
+              <!-- HR  -->
+              <v-divider class="my-5"></v-divider>
 
-      <v-footer color="purple-lighten-2" border app>2024 - PawTrack</v-footer>
-    </v-app>
-  </v-responsive>
+              <h5 class="text-center">
+                Don't have account?
+                <router-link class="text-primary" to="/register"
+                  >Click here to Register</router-link
+                >
+              </h5>
+            </v-card-text>
+          </v-card>
+        </v-col>
+      </v-row>
+    </template>
+  </AppLayout>
 </template>
