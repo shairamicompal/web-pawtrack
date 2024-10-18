@@ -1,3 +1,19 @@
+<script>
+import { ref } from 'vue'
+
+export default {
+  setup() {
+    const isPasswordVisible = ref(false)
+    const isPasswordConfirmVisible = ref(false)
+
+    return {
+      isPasswordVisible,
+      isPasswordConfirmVisible
+    }
+  }
+}
+</script>
+
 <template>
   <v-form fast-fail @submit.prevent>
     <v-text-field label="Firstname" variant="outlined"></v-text-field>
@@ -30,18 +46,3 @@
   </v-form>
 </template>
 
-<script>
-import { ref } from 'vue'
-
-export default {
-  setup() {
-    const isPasswordVisible = ref(false)
-    const isPasswordConfirmVisible = ref(false)
-
-    return {
-      isPasswordVisible,
-      isPasswordConfirmVisible
-    }
-  }
-}
-</script>
