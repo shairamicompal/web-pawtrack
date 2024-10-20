@@ -18,8 +18,8 @@ const { mobile } = useDisplay()
                 src="/images/logo-favicon.jpg"
                 :width="mobile ? '75%' : '25%'"
               ></v-img>
-              <h3 class="font-weight-black">PawTrack</h3>
-              <h6>Login Form</h6>
+              <h3 class="font-weight-black text-yellow-darken-3">PawTrack</h3>
+              <h6 class="text-brown-darken-3">Login Form</h6>
             </v-card-title>
 
             <v-card-text class="bg-surface-light pt-4">
