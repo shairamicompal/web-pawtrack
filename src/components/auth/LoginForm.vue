@@ -1,27 +1,49 @@
-<script>
+<script setup>
+import { requiredValidator, emailValidator } from '@/utils/validators'
 import { ref } from 'vue'
 
-export default {
-  setup() {
-    const isPasswordVisible = ref(false)
+const isPasswordVisible = ref(false)
+const refVForm = ref()
 
-    return {
-      isPasswordVisible,
-    }
-  },
+const formDataDefault = {
+   email: '',
+   password: '',
+}
+
+const formData = ref({
+  ...formDataDefault
+})
+
+
+const onLogin = () => {
+  // alert(formData.value.email)  // Corrected: display email in alert
+}
+
+const onFormSubmit = () => {
+  const isValid = refVForm.value?.validate() // Validate returns a boolean
+  if (isValid) {
+    onLogin()
+  }
 }
 </script>
 
 <template>
-  <v-form fast-fail @submit.prevent>
-    <v-text-field label="Email" variant="outlined"></v-text-field>
+  <v-form ref="refVForm" @submit.prevent="onFormSubmit">
+    <v-text-field 
+      v-model="formData.email"
+      label="Email"
+      prepend-inner-icon="mdi-email-outline" 
+      :rules="[requiredValidator, emailValidator]"
+    ></v-text-field>
 
     <v-text-field 
-      prepend-inner-icon="mdi-lock-outline"
+      v-model="formData.password"
+      prepend-inner-icon="mdi-lock-outline" 
       label="Password"
       :type="isPasswordVisible ? 'text' : 'password'"
       :append-inner-icon="isPasswordVisible ? 'mdi-eye-off' : 'mdi-eye'"
       @click:append-inner="isPasswordVisible = !isPasswordVisible"
+      :rules="[requiredValidator]"
     >
     </v-text-field>
 
@@ -30,3 +52,5 @@ export default {
     </v-btn>
   </v-form>
 </template>
+
+
