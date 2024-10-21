@@ -39,7 +39,7 @@ const { mobile } = useDisplay()
                 <!-- Register Link -->
                 <h4 class="text-center">
                   Already have account?
-                  <router-link class="text-amber-accent-4 font-weight-black" to="/login">
+                  <router-link class="text-amber-accent-4 font-weight-black" to="/">
                     Click here to Login
                   </router-link>
                 </h4>
