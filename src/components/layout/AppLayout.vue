@@ -1,7 +1,11 @@
 <script setup>
 import { ref } from 'vue'
+import { useDisplay } from 'vuetify';
 
 const theme = ref('light')
+
+// Utilize predefined vue functions
+const { mobile } = useDisplay()
 
 function onClick() {
   theme.value = theme.value === 'light' ? 'dark' : 'light'
@@ -14,10 +18,10 @@ function onClick() {
     <v-app :theme="theme">
       <v-app-bar
         class="px-3"
-        :color="theme === 'light' ? 'grey-lighten-1' : 'grey-darken-3'"
+        :color="theme === 'light' ? 'brown-lighten-3' : 'brown-darken-2'"
         border
       >
-        <v-spacer></v-spacer>
+        <v-spacer></v-spacer>                           
 
         <v-btn
           :icon="theme.value === 'light' ? 'mdi-weather-sunny' : 'mdi-weather-night'"
@@ -29,20 +33,19 @@ function onClick() {
       </v-app-bar>
 
       <v-main>
-        <v-container>
           <slot name="content"></slot>
-        </v-container>
-      </v-main>
+      </v-main> 
 
-      <!-- Corrected color value -->
-      <v-footer
-      class="font-weight-bold"
-        :color="theme.value === 'light' ? 'grey-lighten-1' : 'grey-darken-3'"
-        elevation="24"
+      <<v-footer
+        class="font-weight-bold"
+        :class="mobile ? 'text-caption' : ''"
+        :color="theme === 'light' ? 'brown-lighten-1' : 'brown-darken-4'"
         border
         app
       >
-        2024 - PawTrack
+        <div :class="mobile ? 'w-100 text-center' : ''">
+          Copyright © 2024 - PawTrack | All Rights Reserved
+        </div>
       </v-footer>
     </v-app>
   </v-responsive>
