@@ -13,12 +13,12 @@ const { mobile } = useDisplay()
         <v-row>
           <!-- Left Column for Desktop (hidden on mobile) -->
           <v-col cols="12" lg="8" class="bg-surface-light h-screen" v-if="!mobile">
-            <!-- <v-img
-              src="/images/bg-card.jpg"
+            <v-img
+              src="/images/banner-pt.png"
               class="fill-height"
               alt="Background Image"
               cover
-            ></v-img> -->
+            ></v-img>
           </v-col>
 
           <!-- Right Column for Login Form -->
@@ -27,23 +27,22 @@ const { mobile } = useDisplay()
               <!-- Card Title with Logo -->
               <v-card-title class="text-center pb-0">
                 <v-img
-                  class="mx-auto"
-                  src="/images/pawt-favicon.png"
-                  :width="mobile ? '75%' : '40%'"
+                  class="mx-auto mb-10"
+                  src="/images/pawtrack-logo.png"
+                  :width="mobile ? '75%' : '35%'"
                 ></v-img>
-                <h1 class="text-yellow-darken-3 mb-8">PawTrack</h1>
                 <p>Login</p>
               </v-card-title>
 
               <v-card-text class="pt-0">
                 <!-- Form Divider -->
-                <v-divider class="my-5"></v-divider>
+                <v-divider class="my-3"></v-divider>
 
                 <!-- Login Form Component -->
                 <LoginForm class="text-amber-darken-4"></LoginForm>
 
                 <!-- Another Divider -->
-                <v-divider class="my-5"></v-divider>
+                <v-divider class="my-3"></v-divider>
 
                 <!-- Register Link -->
                 <h4 class="text-center">

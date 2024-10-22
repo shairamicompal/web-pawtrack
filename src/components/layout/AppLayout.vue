@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue'
-import { useDisplay } from 'vuetify';
+import { useDisplay } from 'vuetify'
 
 const theme = ref('light')
 
@@ -21,7 +21,7 @@ function onClick() {
         :color="theme === 'light' ? 'brown-lighten-3' : 'brown-darken-2'"
         border
       >
-        <v-spacer></v-spacer>                           
+        <v-spacer></v-spacer>
 
         <v-btn
           :icon="theme.value === 'light' ? 'mdi-weather-sunny' : 'mdi-weather-night'"
@@ -33,10 +33,10 @@ function onClick() {
       </v-app-bar>
 
       <v-main>
-          <slot name="content"></slot>
-      </v-main> 
+        <slot name="content"></slot>
+      </v-main>
 
-      <<v-footer
+      <v-footer
         class="font-weight-bold"
         :class="mobile ? 'text-caption' : ''"
         :color="theme === 'light' ? 'brown-lighten-1' : 'brown-darken-4'"
@@ -44,7 +44,12 @@ function onClick() {
         app
       >
         <div :class="mobile ? 'w-100 text-center' : ''">
-          Copyright © 2024 - PawTrack | All Rights Reserved
+          Copyright © 2024 -
+          <span class="ml-1">
+            <v-icon class="mr-1">mdi-paw</v-icon>
+            PawTrack
+          </span>
+          | All Rights Reserved
         </div>
       </v-footer>
     </v-app>
