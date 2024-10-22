@@ -14,7 +14,7 @@ const { mobile } = useDisplay()
           <!-- Left Column for Desktop (hidden on mobile) -->
           <v-col cols="12" lg="8" class="bg-surface-light h-screen" v-if="!mobile">
             <v-img
-              src="/images/banner-pawtrack.png"
+              src="/images/banner-pt.png"
               class="fill-height"
               alt="Background Image"
               cover
