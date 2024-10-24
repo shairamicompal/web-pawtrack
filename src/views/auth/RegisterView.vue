@@ -38,7 +38,7 @@ const { mobile } = useDisplay()
 
                 <v-divider class="my-3"></v-divider>
 
-                <RegisterForm class="text-amber-darken-4"></RegisterForm>
+                <RegisterForm></RegisterForm>
 
                 <v-divider class="my-3"></v-divider>
 

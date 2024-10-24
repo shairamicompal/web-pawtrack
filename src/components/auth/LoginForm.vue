@@ -28,7 +28,7 @@ const onFormSubmit = () => {
 
 <template>
   <v-form ref="refVForm" @submit.prevent="onFormSubmit">
-    <v-row dense>
+    <v-row dense class="text-amber-darken-4">
       <v-col cols="12">
         <v-text-field
           v-model="formData.email"
