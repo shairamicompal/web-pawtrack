@@ -6,6 +6,8 @@ import {
   confirmedValidator
 } from '@/utils/validators'
 import { ref } from 'vue'
+import { supabase, formActionDefault } from '@/utils/supabase.js'
+import AlertNotification from '@/components/common/AlertNotification.vue'
 
 const formDataDefault = {
   firstname: '',
@@ -15,13 +17,45 @@ const formDataDefault = {
   password_confirmation: ''
 }
 
-const formData = ref({ ...formDataDefault })
+const formData = ref({
+  ...formDataDefault
+})
+
+const formAction = ref({
+  ...formActionDefault
+})
+
 const isPasswordVisible = ref(false)
 const isPasswordConfirmVisible = ref(false)
 const refVForm = ref()
 
-const onSubmit = () => {
-  alert(formData.value.email)
+const onSubmit = async () => {
+  formAction.value = { ...formActionDefault }
+  formAction.value.formProcess = true
+
+  const { data, error } = await supabase.auth.signUp({
+    email: formData.value.email,
+    password: formData.value.password,
+    options: {
+      data: {
+        firstname: formData.value.firstname,
+        lastname: formData.value.lastname
+      }
+    }
+  })
+
+  if (error) {
+    console.log(error)
+    formAction.value.formErrorMessage = error.message
+    formAction.value.formStatus = error.status
+  } else if (data) {
+    console.log(data)
+    formAction.value.formSuccessMessage = 'Successfully Registered Account.'
+    // Add here more actions if you want
+    refVForm.value?.reset()
+  }
+
+  formAction.value.formProcess = false
 }
 
 const onFormSubmit = () => {
@@ -32,8 +66,13 @@ const onFormSubmit = () => {
 </script>
 
 <template>
-  <v-form ref="refVForm" @submit.prevent="onFormSubmit()">
-    <v-row dense>
+  <alert-notification
+    :form-success-message="formAction.formSuccessMessage"
+    :form-error-message="formAction.formErrorMessage"
+  ></alert-notification>
+
+  <v-form class="mt-5" ref="refVForm" @submit.prevent="onFormSubmit()">
+    <v-row dense class="text-amber-darken-4">
       <v-col cols="12" md="6">
         <v-text-field
           label="Firstname"
@@ -89,12 +128,15 @@ const onFormSubmit = () => {
       </v-col>
     </v-row>
 
-    <v-btn class="mt-2" 
-          type="submit" 
-          block 
-          color="brown-darken-1" 
-          prepend-icon="mdi-account-plus"
-          >
+    <v-btn
+      class="mt-2"
+      type="submit"
+      color="brown-darken-1"
+      prepend-icon="mdi-account-plus"
+      :disabled="formAction.formProcess"
+      :loading="formAction.formProcess"
+      block
+    >
       Register
     </v-btn>
   </v-form>

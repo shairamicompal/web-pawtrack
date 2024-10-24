@@ -39,7 +39,7 @@ const { mobile } = useDisplay()
                 <v-divider class="my-3"></v-divider>
 
                 <!-- Login Form Component -->
-                <LoginForm class="text-amber-darken-4"></LoginForm>
+                <LoginForm></LoginForm>
 
                 <!-- Another Divider -->
                 <v-divider class="my-3"></v-divider>
