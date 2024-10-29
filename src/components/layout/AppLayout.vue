@@ -1,16 +1,35 @@
 <script setup>
-import { ref } from 'vue'
+import { isAuthenticated } from '@/utils/supabase'
+import ProfileHeaderNavigation from './ProfileHeaderNavigation.vue'
+import { onMounted, ref } from 'vue'
 import { useDisplay } from 'vuetify'
 
-const theme = ref('light')
+const props = defineProps(['isWithAppBarNavIcon'])
+
+const emit = defineEmits(['isDrawerVisible'])
 
 // Utilize predefined vue functions
 const { mobile } = useDisplay()
 
-function onClick() {
+// Load Variables
+const isLoggedIn = ref(false)
+const theme = ref(localStorage.getItem('theme') ?? 'light')
+
+//  Toggle Theme
+const onToggleTheme = () => {
   theme.value = theme.value === 'light' ? 'dark' : 'light'
   localStorage.setItem('theme', theme.value)
 }
+
+// Get Authentication status from supabase
+const getLoggedStatus = async () => {
+  isLoggedIn.value = await isAuthenticated()
+}
+
+// Load Functions during component rendering
+onMounted(() => {
+  getLoggedStatus()
+})
 </script>
 
 <template>
@@ -21,17 +40,29 @@ function onClick() {
         :color="theme === 'light' ? 'brown-lighten-3' : 'brown-darken-2'"
         border
       >
+      <v-app-bar-nav-icon
+          v-if="props.isWithAppBarNavIcon"
+          icon="mdi-menu"
+          :theme="theme"
+          @click="emit('isDrawerVisible')"
+        >
+        </v-app-bar-nav-icon>
+
         <v-spacer></v-spacer>
 
         <v-btn
-          :icon="theme.value === 'light' ? 'mdi-weather-sunny' : 'mdi-weather-night'"
+        class="me-2"
+          :icon="theme === 'light' ? 'mdi-weather-sunny' : 'mdi-weather-night'"
           variant="elevated"
-          text="Toggle Theme"
           slim
-          @click="onClick"
+          @click="onToggleTheme"
         ></v-btn>
+
+        <ProfileHeaderNavigation v-if="isLoggedIn"></ProfileHeaderNavigation>
       </v-app-bar>
 
+      <slot name="navigation"></slot>
+      
       <v-main>
         <slot name="content"></slot>
       </v-main>

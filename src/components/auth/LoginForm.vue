@@ -1,6 +1,12 @@
 <script setup>
+import AlertNotification from '@/components/common/AlertNotification.vue'
+import { formActionDefault, supabase } from '@/utils/supabase'
 import { requiredValidator, emailValidator } from '@/utils/validators'
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+
+// Utilize pre-defined vue functions
+const router = useRouter()
 
 const isPasswordVisible = ref(false)
 const refVForm = ref()
@@ -14,19 +20,49 @@ const formData = ref({
   ...formDataDefault
 })
 
-const onLogin = () => {
-  // alert(formData.value.email)  // Corrected: display email in alert
+const formAction = ref({
+  ...formActionDefault
+})
+
+const onSubmit = async () => {
+  // Reset Form Action utils; Turn on processing at the same time
+  formAction.value = { ...formActionDefault, formProcess: true }
+
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email: formData.value.email,
+    password: formData.value.password
+  })
+
+  if (error) {
+    // Add Error Message and Status Code
+    formAction.value.formErrorMessage = error.message
+    formAction.value.formStatus = error.status
+  } else if (data) {
+    // Add Success Message
+    formAction.value.formSuccessMessage = 'Successfully Logged Account.'
+    // Redirect Acct to Dashboard
+    router.replace('/dashboard')
+  }
+
+  // Reset Form
+  refVForm.value?.reset()
+  // Turn off processing
+  formAction.value.formProcess = false
 }
 
 const onFormSubmit = () => {
-  const isValid = refVForm.value?.validate() // Validate returns a boolean
-  if (isValid) {
-    onLogin()
-  }
+  refVForm.value?.validate().then(({ valid }) => {
+    if (valid) onSubmit()
+  })
 }
 </script>
 
 <template>
+  <AlertNotification
+    :form-success-message="formAction.formSuccessMessage"
+    :form-error-message="formAction.formErrorMessage"
+  ></AlertNotification>
+
   <v-form ref="refVForm" @submit.prevent="onFormSubmit">
     <v-row dense class="text-amber-darken-4">
       <v-col cols="12">
@@ -52,7 +88,15 @@ const onFormSubmit = () => {
       </v-col>
     </v-row>
 
-    <v-btn class="mt-2" type="submit" block color="brown" prepend-icon="mdi-login">
+    <v-btn
+      class="mt-2"
+      type="submit"
+      color="brown"
+      :disabled="formAction.formProcess"
+      :loading="formAction.formProcess"
+      prepend-icon="mdi-login"
+      block
+    >
       Login
     </v-btn>
   </v-form>

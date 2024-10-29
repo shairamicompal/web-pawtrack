@@ -8,6 +8,9 @@ import {
 import { ref } from 'vue'
 import { supabase, formActionDefault } from '@/utils/supabase.js'
 import AlertNotification from '@/components/common/AlertNotification.vue'
+import { useRouter } from 'vue-router';
+
+const router = useRouter()
 
 const formDataDefault = {
   firstname: '',
@@ -39,7 +42,9 @@ const onSubmit = async () => {
     options: {
       data: {
         firstname: formData.value.firstname,
-        lastname: formData.value.lastname
+        lastname: formData.value.lastname,
+        is_admin: false // Just turn to true if admin account
+        // role: 'Administrator' // If role based; just change the string based on role
       }
     }
   })
@@ -52,8 +57,10 @@ const onSubmit = async () => {
     console.log(data)
     formAction.value.formSuccessMessage = 'Successfully Registered Account.'
     // Add here more actions if you want
-    refVForm.value?.reset()
+    router.replace('/dashboard')
   }
+
+  refVForm.value?.reset()
 
   formAction.value.formProcess = false
 }
@@ -67,6 +74,7 @@ const onFormSubmit = () => {
 
 <template>
   <alert-notification
+  v-if="formAction.formSuccessMessage || formAction.formErrorMessage"
     :form-success-message="formAction.formSuccessMessage"
     :form-error-message="formAction.formErrorMessage"
   ></alert-notification>
