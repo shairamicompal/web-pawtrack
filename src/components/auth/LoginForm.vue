@@ -3,6 +3,10 @@ import AlertNotification from '@/components/common/AlertNotification.vue'
 import { formActionDefault, supabase } from '@/utils/supabase'
 import { requiredValidator, emailValidator } from '@/utils/validators'
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+
+// Utilize pre-defined vue functions
+const router = useRouter()
 
 const isPasswordVisible = ref(false)
 const refVForm = ref()
