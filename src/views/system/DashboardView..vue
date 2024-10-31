@@ -5,6 +5,21 @@ import { ref } from 'vue'
 
 const isDrawerVisible = ref(true)
 
+const options = {
+  chart: {
+    id: 'vuechart-example'
+  },
+  xaxis: {
+    categories: [1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998]
+  }
+}
+
+const series = [
+  {
+    name: 'series-1',
+    data: [30, 40, 45, 50, 49, 60, 70, 91]
+  }
+]
 </script>
 
 <template>
@@ -13,11 +28,37 @@ const isDrawerVisible = ref(true)
     @is-drawer-visible="isDrawerVisible = !isDrawerVisible"
   >
     <template #navigation>
-        <SideNavigation :is-drawer-visible="isDrawerVisible"></SideNavigation>
+      <SideNavigation :is-drawer-visible="isDrawerVisible"></SideNavigation>
+    </template>
+
+    <template #content>
+      <v-container>
+        <v-card class="mb-5">
+          <template #title>
+            <span class="text-h6 font-weight-bold">
+              <v-breadcrumbs :items="['System', 'Dashboard']">
+                <template #prepend>
+                  <v-icon icon="mdi-view-dashboard" size="small" class="me-1"></v-icon>
+                </template>
+              </v-breadcrumbs>
+            </span>
           </template>
 
-          <template #content>
-            <v-container></v-container>
+          <template #subtitle>
+            <p class="ms-4 text-wrap"></p>
+          </template>
+        </v-card>
+
+        <v-row>
+          <v-col cols="12" lg="6">
+            <v-card title="Sample Line Graph">
+              <v-card-text>
+                <apexchart width="100%" type="line" :options="options" :series="series"></apexchart>
+              </v-card-text>
+            </v-card>
+          </v-col>
+        </v-row>
+      </v-container>
     </template>
   </AppLayout>
 </template>
