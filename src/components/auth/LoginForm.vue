@@ -63,7 +63,7 @@ const onFormSubmit = () => {
     :form-error-message="formAction.formErrorMessage"
   ></AlertNotification>
 
-  <v-form ref="refVForm" @submit.prevent="onFormSubmit">
+  <v-form class="mt-5" ref="refVForm" @submit.prevent="onFormSubmit">
     <v-row dense class="text-amber-darken-4">
       <v-col cols="12">
         <v-text-field
