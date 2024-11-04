@@ -6,7 +6,6 @@ import { createClient } from '@supabase/supabase-js'
   import.meta.env.VITE_SUPABASE_ANON_KEY
 )
 
-
 // 👉 Check if the session exists and is valid; Return false if there's an error
 export const isAuthenticated = async () => {
   const { data, error } = await supabase.auth.getSession()
