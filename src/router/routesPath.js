@@ -3,6 +3,7 @@ import RegisterView from '@/views/auth/RegisterView.vue'
 import DashboardView from '@/views/system/DashboardView..vue'
 import ForbiddenView from '@/views/errors/ForbiddenView.vue'
 import NotFoundView from '@/views/errors/NotFoundView.vue'
+import AccountSettingsView from '@/views/system/AccountSettingsView.vue'
 
 
 
@@ -34,6 +35,13 @@ export const routesPath = [
     component: DashboardView,
     meta: { requiresAuth: true }
   },
+  {
+    path: '/account/settings',
+    name: 'account-settings',
+    component: AccountSettingsView,
+    meta: { requiresAuth: true }
+  },
+
   // Errors Pages
   {
     path: '/forbidden',
