@@ -57,7 +57,7 @@ export const useAuthUserStore = defineStore('authUser', () => {
   // Update User Profile Image
   async function updateUserImage(file) {
     const { data, error } = await supabase.storage
-      .from('PawTrack')
+      .from('pawtrack')
       .upload('avatars/' + userData.value.id + '-avatar.png', file, {
         cacheControl: '3600',
         upsert: true
@@ -70,7 +70,7 @@ export const useAuthUserStore = defineStore('authUser', () => {
     // If no error set data to userData state with the image_url
     else if (data) {
       // Retrieve Image Public Url
-      const { data: imageData } = supabase.storage.from('PawTrack').getPublicUrl(data.path)
+      const { data: imageData } = supabase.storage.from('pawtrack').getPublicUrl(data.path)
       return await updateUserInformation({ ...userData.value, image_url: imageData.publicUrl })
     }
   }
@@ -78,11 +78,11 @@ export const useAuthUserStore = defineStore('authUser', () => {
   // Listen for authentication state changes
   supabase.auth.onAuthStateChange(async (event) => {
     if (event === 'SIGNED_IN') {
-      await getUserInformation(); // Fetch user data when signed in
+      await getUserInformation() // Fetch user data when signed in
     } else if (event === 'SIGNED_OUT') {
-      $reset(); // Reset user data when signed out
+      $reset() // Reset user data when signed out
     }
-  });
+  })
 
   return {
     userData,

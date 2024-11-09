@@ -78,7 +78,7 @@ const onFormSubmit = () => {
   ></AlertNotification>
 
   <v-form ref="refVForm" @submit.prevent="onFormSubmit">
-    <v-row  class="text-amber-darken-4">
+    <v-row  class="text-amber-darken-4 mt-2">
       <v-col cols="12" md="5">
         <v-img
           width="55%"
