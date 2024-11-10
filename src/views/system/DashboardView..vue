@@ -1,25 +1,22 @@
 <script setup>
 import AppLayout from '@/components/layout/AppLayout.vue'
 import SideNavigation from '@/components/layout/navigation/SideNavigation.vue'
+import WelcomeWidget from '@/components/system/dashboard/WelcomeWidget.vue';
+// import { useAuthUserStore } from '@/stores/authUser'
 import { ref } from 'vue'
+import { useDisplay } from 'vuetify'
 
-const isDrawerVisible = ref(true)
+// // Use Pinia Store
+// const authStore = useAuthUserStore()
 
-const options = {
-  chart: {
-    id: 'vuechart-example'
-  },
-  xaxis: {
-    categories: [1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998]
-  }
-}
+// Utilize pre-defined vue functions
+const { mobile } = useDisplay()
 
-const series = [
-  {
-    name: 'series-1',
-    data: [30, 40, 45, 50, 49, 60, 70, 91]
-  }
-]
+// Load Variables
+// const isSuperAdmin = authStore.userRole === 'Super Administrator'
+const isDrawerVisible = ref(mobile.value ? false : true)
+
+
 </script>
 
 <template>
@@ -33,30 +30,26 @@ const series = [
 
     <template #content>
       <v-container>
-        <v-card class="mb-5">
-          <template #title>
-            <span class="text-h6 font-weight-bold">
-              <v-breadcrumbs :items="['System', 'Dashboard']">
-                <template #prepend>
-                  <v-icon icon="mdi-view-dashboard" size="small" class="me-1"></v-icon>
-                </template>
-              </v-breadcrumbs>
-            </span>
-          </template>
-
-          <template #subtitle>
-            <p class="ms-4 text-wrap"></p>
-          </template>
-        </v-card>
-
         <v-row>
-          <v-col cols="12" lg="6">
-            <v-card title="Sample Line Graph">
-              <v-card-text>
-                <apexchart width="100%" type="line" :options="options" :series="series"></apexchart>
-              </v-card-text>
-            </v-card>
+          <v-col cols="12">
+            <WelcomeWidget></WelcomeWidget>
           </v-col>
+
+          <!-- <v-col cols="12" md="8">
+            <ProductsWidget></ProductsWidget>
+          </v-col> -->
+
+          <!-- <v-col cols="12" md="4">
+            <v-row>
+              <v-col cols="12" v-if="isSuperAdmin">
+                <CodeGeneratorWidget></CodeGeneratorWidget>
+              </v-col>
+
+              <v-col cols="12">
+                <MapWidget></MapWidget>
+              </v-col>
+            </v-row>
+          </v-col> -->
         </v-row>
       </v-container>
     </template>
