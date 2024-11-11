@@ -2,6 +2,7 @@
 import AppLayout from '@/components/layout/AppLayout.vue'
 import SideNavigation from '@/components/layout/navigation/SideNavigation.vue'
 import WelcomeWidget from '@/components/system/dashboard/WelcomeWidget.vue';
+import MapWidget from '@/components/system/dashboard/MapWidget.vue';
 // import { useAuthUserStore } from '@/stores/authUser'
 import { ref } from 'vue'
 import { useDisplay } from 'vuetify'
@@ -34,21 +35,13 @@ const isDrawerVisible = ref(mobile.value ? false : true)
           <v-col cols="12">
             <WelcomeWidget></WelcomeWidget>
           </v-col>
-
-          <!-- <v-col cols="12" md="8">
-            <ProductsWidget></ProductsWidget>
-          </v-col> -->
-
-          <!-- <v-col cols="12" md="4">
-            <v-row>
-              <v-col cols="12" v-if="isSuperAdmin">
-                <CodeGeneratorWidget></CodeGeneratorWidget>
-              </v-col>
-
-              <v-col cols="12">
+ 
+          
+          <v-col cols="12">
                 <MapWidget></MapWidget>
               </v-col>
-            </v-row>
+          <!-- <v-col cols="12" md="8">
+            <ProductsWidget></ProductsWidget>
           </v-col> -->
         </v-row>
       </v-container>
