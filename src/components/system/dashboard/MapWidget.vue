@@ -3,7 +3,7 @@ import leaflet from 'leaflet'
 import { onMounted, ref, watchEffect } from 'vue'
 import { useGeolocation } from '@vueuse/core'
 import { useAuthUserStore } from '@/stores/authUser'
-import 'leaflet/dist/leaflet.css';
+
 
 
 // Use Pinia Store
