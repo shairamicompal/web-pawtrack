@@ -46,11 +46,13 @@ export const routesPath = [
   {
     path: '/forbidden',
     name: 'forbidden',
-    component: ForbiddenView
+    component: ForbiddenView,
+    meta: { isDefault: true }
   },
   {
     path: '/:catchAll(.*)',
     name: 'not-found',
-    component: NotFoundView
+    component: NotFoundView,
+    meta: { isDefault: true }
   }
 ]

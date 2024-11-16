@@ -1,12 +1,14 @@
 <script setup>
-import {
-  mainNav,
-  menuItemsNav1,
-  menuItemsNav2,
-  menuItemsNav3,
-  menuItemsNav4,
-  menuItemsNav5
-} from './sideNavigation'
+// import {
+//   mainNav,
+//   menuItemsNav1,
+//   menuItemsNav2,
+//   menuItemsNav3,
+//   menuItemsNav4,
+//   menuItemsNav5
+// } from './sideNavigation'
+import { mainNav } from './sideNavigation'
+
 import { useDisplay } from 'vuetify'
 import { ref, watch } from 'vue'
 
@@ -31,21 +33,20 @@ watch(props, () => {
   >
     <v-list density="compact" nav>
       <v-list-item
-        prepend-icon="mdi-view-dashboard"
-        title="Dashboard"
+        prepend-icon="mdi-home"
+        title="Home"
         to="/dashboard"
       ></v-list-item>
 
       <v-divider></v-divider>
-
-      <v-list-group :key="i" v-for="([title, icon], i) in mainNav">
+<!-- 
+       <v-list-group :key="i" v-for="([title, icon], i) in mainNav">
         <template #activator="{ props }">
           <v-list-item v-bind="props" :prepend-icon="icon" :title="title"></v-list-item>
         </template>
 
-        <template v-if="title === 'User Management'">
+        <template v-if="title === 'About'">
           <v-list-item
-            v-for="([title, icon, subtitle, to], i) in menuItemsNav1"
             :key="i"
             :prepend-icon="icon"
             :title="title"
@@ -54,9 +55,8 @@ watch(props, () => {
           ></v-list-item>
         </template>
 
-        <template v-if="title === 'Product Management'">
+        <template v-if="title === 'Reports'">
           <v-list-item
-            v-for="([title, icon, subtitle, to], i) in menuItemsNav2"
             :key="i"
             :prepend-icon="icon"
             :title="title"
@@ -65,9 +65,8 @@ watch(props, () => {
           ></v-list-item>
         </template>
 
-        <template v-if="title === 'Inventory'">
+        <template v-if="title === 'Pet Facts'">
           <v-list-item
-            v-for="([title, icon, subtitle, to], i) in menuItemsNav3"
             :key="i"
             :prepend-icon="icon"
             :title="title"
@@ -76,9 +75,8 @@ watch(props, () => {
           ></v-list-item>
         </template>
 
-        <template v-if="title === 'Expense Management'">
+        <template v-if="title === 'Help and FAQS'">
           <v-list-item
-            v-for="([title, icon, subtitle, to], i) in menuItemsNav4"
             :key="i"
             :prepend-icon="icon"
             :title="title"
@@ -87,9 +85,8 @@ watch(props, () => {
           ></v-list-item>
         </template>
 
-        <template v-if="title === 'Reporting'">
+        <template v-if="title === 'Contact Us'">
           <v-list-item
-            v-for="([title, icon, subtitle, to], i) in menuItemsNav5"
             :key="i"
             :prepend-icon="icon"
             :title="title"
@@ -97,7 +94,14 @@ watch(props, () => {
             :to="to ?? undefined"
           ></v-list-item>
         </template>
-      </v-list-group>
+      </v-list-group>  -->
+
+      <v-list-item
+      v-for="([title, icon], i) in mainNav"
+      :key="i"
+      :prepend-icon="icon"
+      :title="title"
+    ></v-list-item>
 
       <v-divider></v-divider>
 
@@ -109,3 +113,19 @@ watch(props, () => {
     </v-list>
   </v-navigation-drawer>
 </template>
+
+<style scoped>
+  .v-list-item {
+    transition: transform 0.3s ease; /* Smooth transition for scaling */
+  }
+
+  .v-list-item:hover {
+    /* background-color: #f5f5f5; */
+    transform: scale(1.05); /* Slightly enlarge the item to create the pop effect */
+  }
+
+  /* Optional: Add a "pop-out" effect when hover ends */
+  .v-list-item:not(:hover) {
+    transform: scale(1); /* Reset the size when not hovered */
+  }
+</style>

@@ -1,6 +1,7 @@
 <script setup>
 import { isAuthenticated } from '@/utils/supabase'
 import ProfileHeaderNavigation from './ProfileHeaderNavigation.vue'
+import { useAuthUserStore } from '@/stores/authUser'
 import { onMounted, ref } from 'vue'
 import { useDisplay } from 'vuetify'
 
@@ -9,7 +10,11 @@ const props = defineProps(['isWithAppBarNavIcon'])
 const emit = defineEmits(['isDrawerVisible'])
 
 // Utilize predefined vue functions
-const { mobile } = useDisplay()
+const { xs, sm, mobile } = useDisplay()
+
+// Use Pinia Store
+const authStore = useAuthUserStore()
+
 
 // Load Variables
 const isLoggedIn = ref(false)
@@ -47,6 +52,10 @@ onMounted(() => {
           @click="emit('isDrawerVisible')"
         >
         </v-app-bar-nav-icon>
+
+        <v-app-bar-title>
+          <v-img src="/images/pawtrack-logo.png" :width="xs ? '100%' : sm ? '40%' : '9%'"></v-img>
+        </v-app-bar-title>
 
         <v-spacer></v-spacer>
 
