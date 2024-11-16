@@ -53,9 +53,9 @@ onMounted(() => {
         >
         </v-app-bar-nav-icon>
 
-        <v-app-bar-title>
+        <!-- <v-app-bar-title>
           <v-img src="/images/pawtrack-logo.png" :width="xs ? '100%' : sm ? '40%' : '9%'"></v-img>
-        </v-app-bar-title>
+        </v-app-bar-title> -->
 
         <v-spacer></v-spacer>
 

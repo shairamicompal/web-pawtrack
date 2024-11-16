@@ -43,16 +43,16 @@ export const useAuthUserStore = defineStore('authUser', () => {
       }
     })
 
-    // Check if it has error
-    if (error) {
-      return { error }
+       // Check if it has error;
+       if (error) {
+        return { success: false, error }
+      }
+      // If no error set updatedData to userData state
+      else if (user_metadata) {
+        userData.value = { id, email, ...user_metadata }
+        return { success: true, data: userData.value }
+      }
     }
-    // If no error set updatedData to userData state
-    else if (user_metadata) {
-      userData.value = { id, email, ...user_metadata }
-      return { data: userData.value }
-    }
-  }
 
   // Update User Profile Image
   async function updateUserImage(file) {
@@ -74,15 +74,6 @@ export const useAuthUserStore = defineStore('authUser', () => {
       return await updateUserInformation({ ...userData.value, image_url: imageData.publicUrl })
     }
   }
-
-  // Listen for authentication state changes
-  supabase.auth.onAuthStateChange(async (event) => {
-    if (event === 'SIGNED_IN') {
-      await getUserInformation() // Fetch user data when signed in
-    } else if (event === 'SIGNED_OUT') {
-      $reset() // Reset user data when signed out
-    }
-  })
 
   return {
     userData,
