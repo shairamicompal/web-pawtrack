@@ -22,6 +22,12 @@ const isDrawerVisible = ref(props.isDrawerVisible)
 watch(props, () => {
   isDrawerVisible.value = props.isDrawerVisible
 })
+
+// Function to generate valid routes dynamically
+function generateRoute(title) {
+  if (!title) return null
+  return `/${title.replace(/\s+/g, '-').toLowerCase()}`
+}
 </script>
 
 <template>
@@ -39,69 +45,15 @@ watch(props, () => {
       ></v-list-item>
 
       <v-divider></v-divider>
-<!-- 
-       <v-list-group :key="i" v-for="([title, icon], i) in mainNav">
-        <template #activator="{ props }">
-          <v-list-item v-bind="props" :prepend-icon="icon" :title="title"></v-list-item>
-        </template>
 
-        <template v-if="title === 'About'">
-          <v-list-item
-            :key="i"
-            :prepend-icon="icon"
-            :title="title"
-            :subtitle="subtitle ?? undefined"
-            :to="to ?? undefined"
-          ></v-list-item>
-        </template>
-
-        <template v-if="title === 'Reports'">
-          <v-list-item
-            :key="i"
-            :prepend-icon="icon"
-            :title="title"
-            :subtitle="subtitle ?? undefined"
-            :to="to ?? undefined"
-          ></v-list-item>
-        </template>
-
-        <template v-if="title === 'Pet Facts'">
-          <v-list-item
-            :key="i"
-            :prepend-icon="icon"
-            :title="title"
-            :subtitle="subtitle ?? undefined"
-            :to="to ?? undefined"
-          ></v-list-item>
-        </template>
-
-        <template v-if="title === 'Help and FAQS'">
-          <v-list-item
-            :key="i"
-            :prepend-icon="icon"
-            :title="title"
-            :subtitle="subtitle ?? undefined"
-            :to="to ?? undefined"
-          ></v-list-item>
-        </template>
-
-        <template v-if="title === 'Contact Us'">
-          <v-list-item
-            :key="i"
-            :prepend-icon="icon"
-            :title="title"
-            :subtitle="subtitle ?? undefined"
-            :to="to ?? undefined"
-          ></v-list-item>
-        </template>
-      </v-list-group>  -->
-
+      <!-- Replace the dropdown groups with single list items -->
       <v-list-item
-      v-for="([title, icon], i) in mainNav"
-      :key="i"
-      :prepend-icon="icon"
-      :title="title"
-    ></v-list-item>
+        v-for="([title, icon], i) in mainNav"
+        :key="i"
+        :prepend-icon="icon"
+        :title="title"
+        :to="`/${title.replace(/\s+/g, '-').toLowerCase()}`"
+      ></v-list-item>
 
       <v-divider></v-divider>
 
@@ -120,11 +72,9 @@ watch(props, () => {
   }
 
   .v-list-item:hover {
-    /* background-color: #f5f5f5; */
     transform: scale(1.05); /* Slightly enlarge the item to create the pop effect */
   }
 
-  /* Optional: Add a "pop-out" effect when hover ends */
   .v-list-item:not(:hover) {
     transform: scale(1); /* Reset the size when not hovered */
   }

@@ -4,8 +4,7 @@ import DashboardView from '@/views/system/DashboardView.vue'
 import ForbiddenView from '@/views/errors/ForbiddenView.vue'
 import NotFoundView from '@/views/errors/NotFoundView.vue'
 import AccountSettingsView from '@/views/system/AccountSettingsView.vue'
-
-
+// import ReportPostView from '@/views/system/ReportPostView.vue'
 
 // 👉 Routes
 export const routesPath = [
@@ -35,6 +34,12 @@ export const routesPath = [
     component: DashboardView,
     meta: { requiresAuth: true }
   },
+  // {
+  //   path: '/reports',
+  //   name: 'reports',
+  //   component: ReportPostView,
+  //   meta: { requiresAuth: true }
+  // },
   {
     path: '/account/settings',
     name: 'account-settings',
