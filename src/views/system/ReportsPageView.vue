@@ -1,0 +1,299 @@
+<script setup>
+import { useRouter } from 'vue-router'
+import AppLayout from '@/components/layout/AppLayout.vue'
+import SideNavigation from '@/components/layout/navigation/SideNavigation.vue'
+import { ref, onMounted, computed } from 'vue'
+import { useDisplay } from 'vuetify'
+import { supabase } from '@/utils/supabase'
+import { useAuthUserStore } from '@/stores/authUser' // Import the store
+
+const router = useRouter()
+
+// Utilize pre-defined Vue functions
+const { mobile } = useDisplay()
+const isDrawerVisible = ref(mobile.value ? false : true)
+const successMessageVisible = ref(false) // Success message state
+
+// Define reports as a reactive variable
+const reports = ref([])
+const selectedFilter = ref('ALL') // To track the current filter
+const isLoading = ref(true) // Loading state
+const authStore = useAuthUserStore() // Use the auth store to get user data
+
+// Modal state for editing reports
+const isEditModalVisible = ref(false)
+const editingReport = ref(null)
+
+// Access the logged-in user's data from Pinia store
+const user = computed(() => authStore.userData) // Get the current logged-in user from the store
+
+// Define the method to fetch image URLs
+const getImageUrl = (path) => {
+  return supabase.storage.from('pawtrack').getPublicUrl(path).data.publicUrl
+}
+
+// Computed property to filter reports based on the selected filter
+const filteredReports = computed(() => {
+  if (selectedFilter.value === 'ALL') {
+    return reports.value // Show all reports
+  }
+  return reports.value.filter(
+    (report) => report.pet_type?.trim().toUpperCase() === selectedFilter.value
+  ) // Case-insensitive match
+})
+
+// Fetch data from Supabase on mount
+onMounted(async () => {
+  const { data, error } = await supabase.from('pet_reports').select('*')
+  if (error) {
+    console.error('Error fetching reports:', error.message)
+  } else {
+    reports.value = data
+    console.log(
+      'Fetched reports:',
+      data.map((report) => report.pet_type)
+    ) // Debugging
+  }
+  isLoading.value = false // Stop loading once data is fetched
+})
+
+// Remove report function
+const removeReport = async (id, user_id) => {
+  if (authStore.userData?.id === user_id) {
+    const { error } = await supabase.from('pet_reports').delete().eq('id', id)
+    if (error) {
+      console.error('Error removing report:', error.message)
+    } else {
+      reports.value = reports.value.filter((report) => report.id !== id)
+    }
+  } else {
+    alert('You do not have permission to delete this report.')
+  }
+}
+
+// Open edit modal and populate with report data
+const openEditModal = (report) => {
+  editingReport.value = { ...report } // Create a copy of the report to edit
+  isEditModalVisible.value = true
+}
+
+// Save changes to the report
+const saveReportChanges = async () => {
+  const updatedReport = editingReport.value
+  const { error } = await supabase
+    .from('pet_reports')
+    .update({
+      description: updatedReport.description,
+      contact_name: updatedReport.contact_name,
+      contact_num: updatedReport.contact_num,
+      contact_email: updatedReport.contact_email
+    })
+    .eq('id', updatedReport.id)
+
+  if (error) {
+    console.error('Error updating report:', error.message)
+  } else {
+    // Update the local data
+    const index = reports.value.findIndex((r) => r.id === updatedReport.id)
+    if (index !== -1) {
+      reports.value[index] = updatedReport
+    }
+
+    // Show the success message (snackbar)
+    successMessageVisible.value = true
+
+    isEditModalVisible.value = false // Close the modal
+  }
+}
+</script>
+
+<template>
+  <AppLayout
+    :is-with-app-bar-nav-icon="true"
+    @is-drawer-visible="isDrawerVisible = !isDrawerVisible"
+  >
+    <template #navigation>
+      <SideNavigation :is-drawer-visible="isDrawerVisible"></SideNavigation>
+    </template>
+
+    <template #content>
+      <v-container>
+        <v-row>
+          <v-col cols="12" class="text-center mb-4">
+            <v-btn
+              v-for="filter in ['ALL', 'DOG', 'CAT']"
+              :key="filter"
+              class="ma-2"
+              :color="selectedFilter === filter ? 'primary' : 'secondary'"
+              @click="selectedFilter = filter"
+            >
+              {{ filter === 'ALL' ? 'All Reports' : `${filter} Reports` }}
+            </v-btn>
+          </v-col>
+        </v-row>
+
+        <v-row v-if="isLoading">
+          <v-col cols="12" sm="4" md="4" v-for="index in 6" :key="index">
+            <v-skeleton-loader type="card" class="ma-4"></v-skeleton-loader>
+          </v-col>
+        </v-row>
+
+        <v-row v-else v-if="filteredReports.length === 0">
+          <v-col cols="12" class="text-center">
+            <v-alert type="info" border="left" color="blue lighten-4">
+              No reports available at the moment.
+            </v-alert>
+          </v-col>
+        </v-row>
+
+        <v-row v-else>
+          <v-col cols="12" sm="4" md="4" v-for="report in filteredReports" :key="report.id">
+            <v-card class="mx-auto my-4" max-width="400" outlined elevation="10" hover>
+              <v-img
+                :src="getImageUrl(report.image_path)"
+                height="250px"
+                contain
+                class="rounded-lg"
+              />
+              <v-card-title class="text-h6 font-weight-bold text-center">
+                {{ report.pet_type }} - {{ report.report_type }}
+              </v-card-title>
+              <v-card-subtitle class="text-body-2 text-uppercase font-weight-bold" color="primary">
+                {{ report.date }}
+              </v-card-subtitle>
+              <v-card-text>
+                <p><strong>Description:</strong> {{ report.description }}</p>
+                <p><strong>Contact Name:</strong> {{ report.contact_name }}</p>
+                <p><strong>Contact Number:</strong> {{ report.contact_num }}</p>
+                <p><strong>Email:</strong> {{ report.contact_email }}</p>
+              </v-card-text>
+
+              <v-card-actions>
+                <v-btn
+                  v-if="authStore.userData?.id === report.user_id"
+                  color="red"
+                  @click="removeReport(report.id, report.user_id)"
+                  icon
+                >
+                  <v-icon>mdi-delete</v-icon>
+                </v-btn>
+
+                <v-btn
+                  v-if="authStore.userData?.id === report.user_id"
+                  color="blue"
+                  @click="openEditModal(report)"
+                  icon
+                >
+                  <v-icon>mdi-pencil</v-icon>
+                </v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-col>
+        </v-row>
+
+        <v-dialog v-model="isEditModalVisible" persistent max-width="600">
+          <v-card class="elevation-12 rounded-lg" tile>
+            <v-card-title class="text-h5 font-weight-bold"> Edit Report </v-card-title>
+            <v-card-text>
+              <v-text-field
+                v-model="editingReport.description"
+                label="Description"
+                prepend-icon="mdi-comment-text-outline"
+                outlined
+                dense
+                class="mb-3"
+              ></v-text-field>
+
+              <v-row>
+                <v-col cols="12" sm="6">
+                  <v-text-field
+                    v-model="editingReport.contact_name"
+                    label="Contact Name"
+                    prepend-icon="mdi-account"
+                    outlined
+                    dense
+                    class="mb-3"
+                  ></v-text-field>
+                </v-col>
+
+                <v-col cols="12" sm="6">
+                  <v-text-field
+                    v-model="editingReport.contact_num"
+                    label="Contact Number"
+                    prepend-icon="mdi-phone"
+                    outlined
+                    dense
+                    class="mb-3"
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+
+              <v-text-field
+                v-model="editingReport.contact_email"
+                label="Contact Email"
+                prepend-icon="mdi-email"
+                outlined
+                dense
+                class="mb-3"
+              ></v-text-field>
+            </v-card-text>
+            <v-card-actions>
+              <v-btn color="primary" @click="saveReportChanges" class="rounded-lg"> Save </v-btn>
+              <v-btn color="grey" @click="isEditModalVisible = false" class="rounded-lg">
+                Cancel
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+
+        <!-- Success Message (Snackbar) -->
+        <v-snackbar
+          v-model="successMessageVisible"
+          color="green"
+          timeout="3000"
+          top
+          right
+          class="rounded-lg"
+        >
+          Report updated successfully!
+          <template v-slot:action>
+            <v-btn color="green" text @click="successMessageVisible = false" class="rounded-lg">
+              Close
+            </v-btn>
+          </template>
+        </v-snackbar>
+      </v-container>
+    </template>
+  </AppLayout>
+</template>
+
+<style scoped>
+.v-card {
+  transition:
+    transform 0.3s ease-in-out,
+    box-shadow 0.3s ease;
+}
+
+.v-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.v-card-title {
+  color: #333;
+  font-size: 18px;
+}
+
+.v-card-subtitle {
+  color: #007bff;
+  font-size: 14px;
+}
+
+.v-card-actions .v-btn {
+  transition: background-color 0.3s ease;
+}
+
+.v-card-actions .v-btn:hover {
+  background-color: #f0f0f0;
+}
+</style>

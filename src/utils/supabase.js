@@ -18,8 +18,6 @@ export const isAuthenticated = async () => {
   return !!data.session
 }
 
-
-
 // 👉 Form Action utils
 export const formActionDefault = {
   formProcess: false,
