@@ -5,6 +5,7 @@ import ForbiddenView from '@/views/errors/ForbiddenView.vue'
 import NotFoundView from '@/views/errors/NotFoundView.vue'
 import AccountSettingsView from '@/views/system/AccountSettingsView.vue'
 import AboutView from '@/views/system/AboutView.vue'
+import ReportsPageView from '@/views/system/ReportsPageView.vue'
 // import ReportPostView from '@/views/system/ReportPostView.vue'
 
 // 👉 Routes
@@ -40,12 +41,12 @@ export const routesPath = [
     name: 'About',
     component: AboutView,
   },
-  // {
-  //   path: '/reports',
-  //   name: 'reports',
-  //   component: ReportPostView,
-  //   meta: { requiresAuth: true }
-  // },
+  {
+    path: '/reports',
+    name: 'reports',
+    component: ReportsPageView,
+    meta: { requiresAuth: true }
+  },
   {
     path: '/account/settings',
     name: 'account-settings',

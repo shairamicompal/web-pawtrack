@@ -4,11 +4,13 @@ import { ref, onMounted, watchEffect, watch } from 'vue'
 import { useGeolocation } from '@vueuse/core'
 import { supabase } from '@/utils/supabase'
 import { useAuthUserStore } from '@/stores/authUser'
+import { useRouter } from 'vue-router'
 
 // Define reactive properties
 const showAlert = ref(false) // Define the alert visibility state
 const alertMessage = ref('') // Define the alert message
 const alertType = ref('success') // Define the alert type (success, error, etc.)
+const router = useRouter()
 
 // Use Pinia Store
 const authStore = useAuthUserStore()
@@ -51,27 +53,32 @@ const formData = ref({
 })
 const selectedFile = ref(null) // File for upload
 
-
 // Define validation rules
 const rules = {
   required: (value) => !!value || 'This field is required.',
-  email: (value) =>
-    /.+@.+\..+/.test(value) || 'E-mail must be valid.',
-    phone: (value) =>
-  /^[0-9]{11}$/.test(value) || 'Phone number must be exactly 11 digits.',
+  email: (value) => /.+@.+\..+/.test(value) || 'E-mail must be valid.',
+  phone: (value) => /^[0-9]{11}$/.test(value) || 'Phone number must be exactly 11 digits.'
 }
 // Form validation state
 const isFormValid = ref(false)
 const reportForm = ref(null)
+
+// Snackbar state
+const snackbar = ref({
+  visible: false,
+  message: '',
+  color: 'success', // success or error
+  timeout: 3000
+})
 
 // Validate and submit the form
 const validateAndSubmit = () => {
   if (reportForm.value.validate()) {
     submitReport()
   } else {
-    showAlert.value = true
-    alertType.value = 'error'
-    alertMessage.value = 'Please fill in all required fields.'
+    snackbar.value.visible = true
+    snackbar.value.color = 'error'
+    snackbar.value.message = 'Please fill in all required fields.'
   }
 }
 
@@ -121,11 +128,39 @@ async function uploadImage(file) {
 
   if (error) {
     console.error('Error uploading image:', error.message)
-    alert('Failed to upload image. Please try again.')
     return null
   }
 
   return data.path
+}
+
+const fetchReports = async () => {
+  try {
+    const { data: reports, error } = await supabase.from('pet_reports').select('*')
+    if (error) {
+      console.error('Error fetching reports:', error.message)
+      return
+    }
+
+    // Remove existing pins from the map (if needed)
+    map.eachLayer((layer) => {
+      if (layer instanceof leaflet.Marker && layer !== marker) {
+        map.removeLayer(layer)
+      }
+    })
+
+    // Add new pins to the map with different colors for dog and cat
+    reports.forEach((report) => {
+      const petIcon = report.pet_type === 'Dog' ? dogIcon : catIcon
+
+      leaflet
+        .marker([report.latitude, report.longitude], { icon: petIcon }) // Use the petIcon here
+        .addTo(map)
+        .bindPopup(`${report.pet_type} - ${report.report_type}<br>${report.description}`)
+    })
+  } catch (err) {
+    console.error('Unexpected error fetching reports:', err)
+  }
 }
 
 const submitReport = async () => {
@@ -136,8 +171,9 @@ const submitReport = async () => {
   try {
     if (!authStore.userData || !authStore.userData.id) {
       formAction.value.formErrorMessage = 'You must be logged in to submit a report.'
-      showAlert.value = true // Show the alert
-      resetAlert() // Reset the alert after 3 seconds
+      snackbar.value.visible = true
+      snackbar.value.color = 'error'
+      snackbar.value.message = formAction.value.formErrorMessage
       return
     }
 
@@ -150,21 +186,25 @@ const submitReport = async () => {
 
     if (error) {
       formAction.value.formErrorMessage = 'Failed to submit report. Please try again.'
-      formAction.value.formSuccessMessage = ''
-      showAlert.value = true // Show the alert
-      resetAlert() // Reset the alert after 3 seconds
+      snackbar.value.visible = true
+      snackbar.value.color = 'error'
+      snackbar.value.message = formAction.value.formErrorMessage
     } else {
       formAction.value.formSuccessMessage = 'Report submitted successfully!'
-      formAction.value.formErrorMessage = ''
-      showAlert.value = true // Show the alert
-      resetAlert() // Reset the alert after 3 seconds
+      snackbar.value.visible = true
+      snackbar.value.color = 'success'
+      snackbar.value.message = formAction.value.formSuccessMessage
+
+      // Add a pin for the new report with the correct pet icon
+      const petIcon = formData.value.pet_type === 'Dog' ? dogIcon : catIcon
 
       leaflet
-        .marker([formData.value.latitude, formData.value.longitude])
+        .marker([formData.value.latitude, formData.value.longitude], { icon: petIcon })
         .addTo(map)
         .bindPopup(`${formData.value.pet_type} - ${formData.value.report_type}`)
         .openPopup()
 
+      // Reset form data
       formData.value = {
         report_type: '',
         pet_type: '',
@@ -184,22 +224,28 @@ const submitReport = async () => {
   } catch (err) {
     console.error('Unexpected error:', err)
     formAction.value.formErrorMessage = 'Unexpected error occurred. Please try again.'
-    formAction.value.formSuccessMessage = ''
-    showAlert.value = true // Show the alert
-    resetAlert() // Reset the alert after 3 seconds
+    snackbar.value.visible = true
+    snackbar.value.color = 'error'
+    snackbar.value.message = formAction.value.formErrorMessage
   } finally {
     formAction.value.formProcess = false
   }
 }
 
-// Reset alert after a short period (3 seconds)
-const resetAlert = () => {
-  setTimeout(() => {
-    showAlert.value = false
-    formAction.value.formSuccessMessage = ''
-    formAction.value.formErrorMessage = ''
-  }, 5000) // 3 seconds delay before resetting the alert
-}
+// Define custom icons for dog and cat
+const dogIcon = leaflet.icon({
+  iconUrl: 'images/dog-pin.png', // Replace with actual URL of your yellow dog icon
+  iconSize: [50, 50], // Adjust size as needed
+  iconAnchor: [16, 32], // Adjust anchor point
+  popupAnchor: [0, -32] // Adjust popup position
+})
+
+const catIcon = leaflet.icon({
+  iconUrl: 'images/pin-cat.png', // Replace with actual URL of your orange cat icon
+  iconSize: [50, 50], // Adjust size as needed
+  iconAnchor: [16, 32], // Adjust anchor point
+  popupAnchor: [0, -32] // Adjust popup position
+})
 
 watchEffect(() => {
   if (
@@ -209,7 +255,8 @@ watchEffect(() => {
     setMapMarker()
 })
 
-onMounted(() => {
+onMounted(async () => {
+  // Initialize the map
   map = leaflet.map('map').setView(defaultLatLng, 15)
 
   leaflet
@@ -222,8 +269,12 @@ onMounted(() => {
   marker = leaflet.marker(defaultLatLng).addTo(map).bindPopup('You are here!')
 
   map.on('click', onMapClick)
+  fetchReports() // Fetch existing reports when map is loaded
 })
 </script>
+
+
+
 <template>
   <v-card class="pa-4" elevation="2">
     <v-card-title class="headline custom-title"> 📍 Current Location </v-card-title>
@@ -267,6 +318,12 @@ onMounted(() => {
       <div id="map" :style="isSuperAdmin ? 'height: 225px' : 'height: 618px'"></div>
     </v-card-text>
   </v-card>
+
+      <!-- Snackbar for feedback -->
+    <v-snackbar v-model="snackbar.visible" :color="snackbar.color" timeout="3000">
+      {{ snackbar.message }}
+    </v-snackbar>
+    
 
   <!-- Modal for Report Form -->
   <v-dialog v-model="showModal" persistent max-width="600px">
