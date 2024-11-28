@@ -1,15 +1,23 @@
 <script setup>
 import leaflet from 'leaflet'
-import { ref, onMounted, watchEffect, watch } from 'vue'
+import { ref, onMounted, watchEffect } from 'vue'
 import { useGeolocation } from '@vueuse/core'
 import { supabase } from '@/utils/supabase'
 import { useAuthUserStore } from '@/stores/authUser'
 import { useRouter } from 'vue-router'
 
+import {
+  requiredValidator,
+  emailValidator,
+  contactNumberValidator,
+  imageValidator,
+  descriptionValidator
+} from '@/utils/validators'
+
 // Define reactive properties
-const showAlert = ref(false) // Define the alert visibility state
-const alertMessage = ref('') // Define the alert message
-const alertType = ref('success') // Define the alert type (success, error, etc.)
+const showAlert = ref(false)
+const alertMessage = ref('')
+const alertType = ref('success')
 const router = useRouter()
 
 // Use Pinia Store
@@ -43,22 +51,16 @@ const formData = ref({
   pet_type: '',
   description: '',
   date: new Date().toISOString().split('T')[0],
-  image_path: '', // Updated field name
+  image_path: '',
   contact_name: '',
   contact_num: '',
   contact_email: '',
   latitude: 0,
   longitude: 0,
-  user_id: authStore.userData?.id || '' // Use auth store to get the user ID
+  user_id: authStore.userData?.id || ''
 })
-const selectedFile = ref(null) // File for upload
+const selectedFile = ref(null)
 
-// Define validation rules
-const rules = {
-  required: (value) => !!value || 'This field is required.',
-  email: (value) => /.+@.+\..+/.test(value) || 'E-mail must be valid.',
-  phone: (value) => /^[0-9]{11}$/.test(value) || 'Phone number must be exactly 11 digits.'
-}
 // Form validation state
 const isFormValid = ref(false)
 const reportForm = ref(null)
@@ -67,15 +69,26 @@ const reportForm = ref(null)
 const snackbar = ref({
   visible: false,
   message: '',
-  color: 'success', // success or error
+  color: 'success',
   timeout: 3000
 })
 
 // Validate and submit the form
 const validateAndSubmit = () => {
-  if (reportForm.value.validate()) {
+  // Check if required fields are valid
+  const isValid =
+    requiredValidator(formData.value.report_type) &&
+    requiredValidator(formData.value.pet_type) &&
+    descriptionValidator(formData.value.description) &&
+    requiredValidator(formData.value.contact_name) &&
+    contactNumberValidator(formData.value.contact_num) &&
+    emailValidator(formData.value.contact_email) &&
+    imageValidator(selectedFile.value)
+
+  if (isValid) {
     submitReport()
   } else {
+    // If validation fails, show an error snackbar
     snackbar.value.visible = true
     snackbar.value.color = 'error'
     snackbar.value.message = 'Please fill in all required fields.'
@@ -142,19 +155,17 @@ const fetchReports = async () => {
       return
     }
 
-    // Remove existing pins from the map (if needed)
     map.eachLayer((layer) => {
       if (layer instanceof leaflet.Marker && layer !== marker) {
         map.removeLayer(layer)
       }
     })
 
-    // Add new pins to the map with different colors for dog and cat
     reports.forEach((report) => {
       const petIcon = report.pet_type === 'Dog' ? dogIcon : catIcon
 
       leaflet
-        .marker([report.latitude, report.longitude], { icon: petIcon }) // Use the petIcon here
+        .marker([report.latitude, report.longitude], { icon: petIcon })
         .addTo(map)
         .bindPopup(`${report.pet_type} - ${report.report_type}<br>${report.description}`)
     })
@@ -169,82 +180,67 @@ const submitReport = async () => {
   formAction.value.formErrorMessage = ''
 
   try {
-    if (!authStore.userData || !authStore.userData.id) {
-      formAction.value.formErrorMessage = 'You must be logged in to submit a report.'
-      snackbar.value.visible = true
-      snackbar.value.color = 'error'
-      snackbar.value.message = formAction.value.formErrorMessage
-      return
+    if (!authStore.userData?.id) {
+      throw new Error('You must be logged in to submit a report.')
     }
 
-    const imagePath = await uploadImage(selectedFile.value)
-    if (imagePath) {
-      formData.value.image_path = imagePath
-    }
+    const imagePath = selectedFile.value ? await uploadImage(selectedFile.value) : null
+    if (imagePath) formData.value.image_path = imagePath
 
-    const { data, error } = await supabase.from('pet_reports').insert([formData.value])
+    const { error } = await supabase.from('pet_reports').insert([formData.value])
+    if (error) throw new Error('Failed to submit report. Please try again.')
 
-    if (error) {
-      formAction.value.formErrorMessage = 'Failed to submit report. Please try again.'
-      snackbar.value.visible = true
-      snackbar.value.color = 'error'
-      snackbar.value.message = formAction.value.formErrorMessage
-    } else {
-      formAction.value.formSuccessMessage = 'Report submitted successfully!'
-      snackbar.value.visible = true
-      snackbar.value.color = 'success'
-      snackbar.value.message = formAction.value.formSuccessMessage
+    snackbar.value = { visible: true, color: 'success', message: 'Report submitted successfully!' }
+    formAction.value.formSuccessMessage = snackbar.value.message
 
-      // Add a pin for the new report with the correct pet icon
-      const petIcon = formData.value.pet_type === 'Dog' ? dogIcon : catIcon
+    leaflet
+      .marker([formData.value.latitude, formData.value.longitude], {
+        icon: formData.value.pet_type === 'Dog' ? dogIcon : catIcon
+      })
+      .addTo(map)
+      .bindPopup(`${formData.value.pet_type} - ${formData.value.report_type}`)
+      .openPopup()
 
-      leaflet
-        .marker([formData.value.latitude, formData.value.longitude], { icon: petIcon })
-        .addTo(map)
-        .bindPopup(`${formData.value.pet_type} - ${formData.value.report_type}`)
-        .openPopup()
-
-      // Reset form data
-      formData.value = {
-        report_type: '',
-        pet_type: '',
-        description: '',
-        date: new Date().toISOString().split('T')[0],
-        image_path: '',
-        contact_name: '',
-        contact_num: '',
-        contact_email: '',
-        latitude: 0,
-        longitude: 0,
-        user_id: authStore.userData?.id || ''
-      }
-      selectedFile.value = null
-      showModal.value = false
-    }
+    resetForm()
   } catch (err) {
-    console.error('Unexpected error:', err)
-    formAction.value.formErrorMessage = 'Unexpected error occurred. Please try again.'
-    snackbar.value.visible = true
-    snackbar.value.color = 'error'
-    snackbar.value.message = formAction.value.formErrorMessage
+    console.error('Error:', err.message)
+    snackbar.value = { visible: true, color: 'error', message: err.message }
+    formAction.value.formErrorMessage = err.message
   } finally {
     formAction.value.formProcess = false
   }
 }
 
-// Define custom icons for dog and cat
+const resetForm = () => {
+  formData.value = {
+    report_type: '',
+    pet_type: '',
+    description: '',
+    date: new Date().toISOString().split('T')[0],
+    image_path: '',
+    contact_name: '',
+    contact_num: '',
+    contact_email: '',
+    latitude: 0,
+    longitude: 0,
+    user_id: authStore.userData?.id || ''
+  }
+  selectedFile.value = null
+  showModal.value = false
+}
+
 const dogIcon = leaflet.icon({
-  iconUrl: 'images/dog-pin.png', // Replace with actual URL of your yellow dog icon
-  iconSize: [50, 50], // Adjust size as needed
-  iconAnchor: [16, 32], // Adjust anchor point
-  popupAnchor: [0, -32] // Adjust popup position
+  iconUrl: 'images/dog-pin.png',
+  iconSize: [50, 50],
+  iconAnchor: [16, 32],
+  popupAnchor: [0, -32]
 })
 
 const catIcon = leaflet.icon({
-  iconUrl: 'images/pin-cat.png', // Replace with actual URL of your orange cat icon
-  iconSize: [50, 50], // Adjust size as needed
-  iconAnchor: [16, 32], // Adjust anchor point
-  popupAnchor: [0, -32] // Adjust popup position
+  iconUrl: 'images/pin-cat.png',
+  iconSize: [50, 50],
+  iconAnchor: [16, 32],
+  popupAnchor: [0, -32]
 })
 
 watchEffect(() => {
@@ -256,7 +252,6 @@ watchEffect(() => {
 })
 
 onMounted(async () => {
-  // Initialize the map
   map = leaflet.map('map').setView(defaultLatLng, 15)
 
   leaflet
@@ -269,11 +264,9 @@ onMounted(async () => {
   marker = leaflet.marker(defaultLatLng).addTo(map).bindPopup('You are here!')
 
   map.on('click', onMapClick)
-  fetchReports() // Fetch existing reports when map is loaded
+  fetchReports()
 })
 </script>
-
-
 
 <template>
   <v-card class="pa-4" elevation="2">
@@ -319,11 +312,10 @@ onMounted(async () => {
     </v-card-text>
   </v-card>
 
-      <!-- Snackbar for feedback -->
-    <v-snackbar v-model="snackbar.visible" :color="snackbar.color" timeout="3000">
-      {{ snackbar.message }}
-    </v-snackbar>
-    
+  <!-- Snackbar for feedback -->
+  <v-snackbar v-model="snackbar.visible" :color="snackbar.color" timeout="3000">
+    {{ snackbar.message }}
+  </v-snackbar>
 
   <!-- Modal for Report Form -->
   <v-dialog v-model="showModal" persistent max-width="600px">
@@ -343,7 +335,7 @@ onMounted(async () => {
                 label="Report Type"
                 prepend-icon="mdi-alert"
                 required
-                :rules="[rules.required]"
+                :rules="[requiredValidator]"
               />
             </v-col>
             <v-col cols="12" md="6">
@@ -353,7 +345,7 @@ onMounted(async () => {
                 label="Pet Type"
                 prepend-icon="mdi-paw"
                 required
-                :rules="[rules.required]"
+                :rules="[requiredValidator]"
               />
             </v-col>
           </v-row>
@@ -365,7 +357,7 @@ onMounted(async () => {
                 label="Upload Photo"
                 prepend-icon="mdi-camera"
                 accept="image/*"
-                :rules="[rules.required]"
+                :rules="[requiredValidator, imageValidator]"
               />
             </v-col>
             <v-col cols="12">
@@ -374,7 +366,7 @@ onMounted(async () => {
                 label="Description"
                 rows="3"
                 prepend-icon="mdi-comment-text-outline"
-                :rules="[rules.required]"
+                :rules="[requiredValidator, descriptionValidator]"
               />
             </v-col>
             <v-col cols="12">
@@ -383,7 +375,7 @@ onMounted(async () => {
                 label="Date"
                 type="date"
                 prepend-icon="mdi-calendar"
-                :rules="[rules.required]"
+                :rules="[requiredValidator]"
               />
             </v-col>
           </v-row>
@@ -397,7 +389,7 @@ onMounted(async () => {
                 v-model="formData.contact_name"
                 label="Contact Name"
                 prepend-icon="mdi-account"
-                :rules="[rules.required]"
+                :rules="[requiredValidator]"
               />
             </v-col>
             <v-col cols="12" md="6">
@@ -406,7 +398,7 @@ onMounted(async () => {
                 label="Contact Number"
                 type="tel"
                 prepend-icon="mdi-phone"
-                :rules="[rules.required, rules.phone]"
+                :rules="[requiredValidator, contactNumberValidator]"
               />
             </v-col>
             <v-col cols="12">
@@ -415,7 +407,7 @@ onMounted(async () => {
                 label="Contact Email"
                 type="email"
                 prepend-icon="mdi-email"
-                :rules="[rules.required, rules.email]"
+                :rules="[requiredValidator, emailValidator]"
               />
             </v-col>
           </v-row>
