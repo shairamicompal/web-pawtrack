@@ -1,51 +1,43 @@
 <script setup>
-import leaflet from 'leaflet'
-import { ref, onMounted, watchEffect } from 'vue'
-import { useGeolocation } from '@vueuse/core'
-import { supabase } from '@/utils/supabase'
-import { useAuthUserStore } from '@/stores/authUser'
-import { useRouter } from 'vue-router'
-
+import { dogIcon, catIcon, userLocationIcon } from './form-pet/leafletIcons';
+import leaflet from 'leaflet';
+import { ref, onMounted, watchEffect } from 'vue';
+import { useGeolocation } from '@vueuse/core';
+import { supabase } from '@/utils/supabase';
+import { useAuthUserStore } from '@/stores/authUser';
+import { useSnackbar } from './form-pet/useSnackbar';
 import {
   requiredValidator,
   emailValidator,
   contactNumberValidator,
   imageValidator,
   descriptionValidator
-} from '@/utils/validators'
+} from '@/utils/validators';
 
 // Define reactive properties
-const showAlert = ref(false)
-const alertMessage = ref('')
-const alertType = ref('success')
-const router = useRouter()
-
-// Use Pinia Store
-const authStore = useAuthUserStore()
-
-// Form action state
+const showAlert = ref(false);
+const { snackbar, showSnackbar } = useSnackbar();
+const authStore = useAuthUserStore();
 const formAction = ref({
   formSuccessMessage: '',
   formErrorMessage: '',
   formProcess: false
-})
+});
 
-// Geolocation
 const { coords, locatedAt, resume, pause } = useGeolocation({
   enableHighAccuracy: true,
   timeout: 10000,
   maximumAge: 0
-})
+});
 
-// Variables
-let map
-let marker
-const isSuperAdmin = authStore.userRole === 'Super Administrator'
-const defaultLatLng = [8.95555279469484, 125.59780764933492]
-const isTrackingPause = ref(false)
+let map;
+let marker;
+const isSuperAdmin = authStore.userRole === 'Super Administrator';
+const defaultLatLng = [8.95555279469484, 125.59780764933492];
+const isTrackingPause = ref(false);
 
 // Modal and Form Data
-const showModal = ref(false)
+const showModal = ref(false);
 const formData = ref({
   report_type: '',
   pet_type: '',
@@ -58,24 +50,15 @@ const formData = ref({
   latitude: 0,
   longitude: 0,
   user_id: authStore.userData?.id || ''
-})
-const selectedFile = ref(null)
+});
+const selectedFile = ref(null);
 
 // Form validation state
-const isFormValid = ref(false)
-const reportForm = ref(null)
+const isFormValid = ref(false);
+const reportForm = ref(null);
 
-// Snackbar state
-const snackbar = ref({
-  visible: false,
-  message: '',
-  color: 'success',
-  timeout: 3000
-})
-
-// Validate and submit the form
+// Now, replace the snackbar handling code with showSnackbar
 const validateAndSubmit = () => {
-  // Check if required fields are valid
   const isValid =
     requiredValidator(formData.value.report_type) &&
     requiredValidator(formData.value.pet_type) &&
@@ -83,134 +66,134 @@ const validateAndSubmit = () => {
     requiredValidator(formData.value.contact_name) &&
     contactNumberValidator(formData.value.contact_num) &&
     emailValidator(formData.value.contact_email) &&
-    imageValidator(selectedFile.value)
+    imageValidator(selectedFile.value);
 
   if (isValid) {
-    submitReport()
+    submitReport();
   } else {
-    // If validation fails, show an error snackbar
-    snackbar.value.visible = true
-    snackbar.value.color = 'error'
-    snackbar.value.message = 'Please fill in all required fields.'
+    showSnackbar('Please fill in all required fields.', 'error');
   }
-}
+};
 
 // Toggle Geolocation Tracking
 const onTrackingPause = () => {
-  isTrackingPause.value = !isTrackingPause.value
+  isTrackingPause.value = !isTrackingPause.value;
 
   if (isTrackingPause.value) {
-    pause()
-    map.setView(defaultLatLng, 15)
+    pause();
+    map.setView(defaultLatLng, 15);
   } else {
-    resume()
-    setMapMarker()
+    resume();
+    setMapMarker();
   }
-}
+};
 
 // Set marker on map
 const setMapMarker = () => {
-  const newLatLng = [coords.value.latitude, coords.value.longitude]
+  const newLatLng = [coords.value.latitude, coords.value.longitude];
 
   if (coords.value.latitude && coords.value.longitude) {
-    map.setView(newLatLng, 17)
-    marker.setLatLng(newLatLng).openPopup()
+    map.setView(newLatLng, 17);
+    marker.setLatLng(newLatLng).openPopup();
   }
-}
+};
 
 // Add pin on map click
 const onMapClick = (e) => {
-  formData.value.latitude = e.latlng.lat
-  formData.value.longitude = e.latlng.lng
-  showModal.value = true
-}
+  formData.value.latitude = e.latlng.lat;
+  formData.value.longitude = e.latlng.lng;
+  showModal.value = true;
+};
 
 // Handle file selection
 const handleFileChange = (event) => {
-  selectedFile.value = event.target.files[0]
-}
+  selectedFile.value = event.target.files[0];
+};
 
 // Upload image to Supabase Storage
 async function uploadImage(file) {
-  const fileName = `reports/${file.name}`
+  const fileName = `reports/${file.name}`;
 
   const { data, error } = await supabase.storage.from('pawtrack').upload(fileName, file, {
     cacheControl: '3600',
     upsert: true
-  })
+  });
 
   if (error) {
-    console.error('Error uploading image:', error.message)
-    return null
+    console.error('Error uploading image:', error.message);
+    return null;
   }
 
-  return data.path
+  return data.path;
 }
 
+// Fetch existing reports and add markers on the map
 const fetchReports = async () => {
   try {
-    const { data: reports, error } = await supabase.from('pet_reports').select('*')
+    const { data: reports, error } = await supabase.from('pet_reports').select('*');
     if (error) {
-      console.error('Error fetching reports:', error.message)
-      return
+      console.error('Error fetching reports:', error.message);
+      return;
     }
 
     map.eachLayer((layer) => {
       if (layer instanceof leaflet.Marker && layer !== marker) {
-        map.removeLayer(layer)
+        map.removeLayer(layer);
       }
-    })
+    });
 
     reports.forEach((report) => {
-      const petIcon = report.pet_type === 'Dog' ? dogIcon : catIcon
+      const petIcon = report.pet_type === 'Dog' ? dogIcon : catIcon;
 
       leaflet
         .marker([report.latitude, report.longitude], { icon: petIcon })
         .addTo(map)
-        .bindPopup(`${report.pet_type} - ${report.report_type}<br>${report.description}`)
-    })
+        .bindPopup(
+          `<strong>${report.pet_type}</strong> - <strong>${report.report_type}</strong><br>${report.description}`
+        );
+    });
   } catch (err) {
-    console.error('Unexpected error fetching reports:', err)
+    console.error('Unexpected error fetching reports:', err);
   }
-}
+};
 
+// Submit report to the database
 const submitReport = async () => {
-  formAction.value.formProcess = true
-  formAction.value.formSuccessMessage = ''
-  formAction.value.formErrorMessage = ''
+  formAction.value.formProcess = true;
+  formAction.value.formSuccessMessage = '';
+  formAction.value.formErrorMessage = '';
 
   try {
     if (!authStore.userData?.id) {
-      throw new Error('You must be logged in to submit a report.')
+      throw new Error('You must be logged in to submit a report.');
     }
 
-    const imagePath = selectedFile.value ? await uploadImage(selectedFile.value) : null
-    if (imagePath) formData.value.image_path = imagePath
+    const imagePath = selectedFile.value ? await uploadImage(selectedFile.value) : null;
+    if (imagePath) formData.value.image_path = imagePath;
 
-    const { error } = await supabase.from('pet_reports').insert([formData.value])
-    if (error) throw new Error('Failed to submit report. Please try again.')
+    const { error } = await supabase.from('pet_reports').insert([formData.value]);
+    if (error) throw new Error('Failed to submit report. Please try again.');
 
-    snackbar.value = { visible: true, color: 'success', message: 'Report submitted successfully!' }
-    formAction.value.formSuccessMessage = snackbar.value.message
-
+    showSnackbar('Report submitted successfully!', 'success');
+  } catch (err) {
+    showSnackbar(err.message, 'error');
+  } finally {
+    formAction.value.formProcess = false;
     leaflet
       .marker([formData.value.latitude, formData.value.longitude], {
         icon: formData.value.pet_type === 'Dog' ? dogIcon : catIcon
       })
       .addTo(map)
-      .bindPopup(`${formData.value.pet_type} - ${formData.value.report_type}`)
-      .openPopup()
+      .bindPopup(
+        `<strong>${formData.value.pet_type}</strong> - <strong>${formData.value.report_type}</strong>`
+      )
+      .openPopup();
 
-    resetForm()
-  } catch (err) {
-    console.error('Error:', err.message)
-    snackbar.value = { visible: true, color: 'error', message: err.message }
-    formAction.value.formErrorMessage = err.message
-  } finally {
-    formAction.value.formProcess = false
+    resetForm();
   }
-}
+};
 
+// Reset the form after submission
 const resetForm = () => {
   formData.value = {
     report_type: '',
@@ -224,49 +207,41 @@ const resetForm = () => {
     latitude: 0,
     longitude: 0,
     user_id: authStore.userData?.id || ''
-  }
-  selectedFile.value = null
-  showModal.value = false
-}
-
-const dogIcon = leaflet.icon({
-  iconUrl: 'images/dog-pin.png',
-  iconSize: [50, 50],
-  iconAnchor: [16, 32],
-  popupAnchor: [0, -32]
-})
-
-const catIcon = leaflet.icon({
-  iconUrl: 'images/pin-cat.png',
-  iconSize: [50, 50],
-  iconAnchor: [16, 32],
-  popupAnchor: [0, -32]
-})
+  };
+  selectedFile.value = null;
+  showModal.value = false;
+};
 
 watchEffect(() => {
   if (
     coords.value.latitude !== Number.POSITIVE_INFINITY &&
     coords.value.longitude !== Number.POSITIVE_INFINITY
   )
-    setMapMarker()
-})
+    setMapMarker();
+});
 
+// Initialize the map and markers on mount
 onMounted(async () => {
-  map = leaflet.map('map').setView(defaultLatLng, 15)
+  map = leaflet.map('map').setView(defaultLatLng, 15);
 
   leaflet
     .tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
       attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     })
+    .addTo(map);
+
+  // Update the "You are here!" marker with the new custom icon
+  marker = leaflet
+    .marker(defaultLatLng, { icon: userLocationIcon })
     .addTo(map)
+    .bindPopup('You are here!');
 
-  marker = leaflet.marker(defaultLatLng).addTo(map).bindPopup('You are here!')
-
-  map.on('click', onMapClick)
-  fetchReports()
-})
+  map.on('click', onMapClick);
+  fetchReports();
+});
 </script>
+
 
 <template>
   <v-card class="pa-4" elevation="2">
