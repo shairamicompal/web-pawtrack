@@ -18,7 +18,7 @@ import { dogIcon, catIcon, userLocationIcon } from './form-pet/leafletIcons'
 // Supabase store
 const { fetchReports, uploadImage, insertReport } = useSupabaseStore()
 
-const showAlert = ref(false);
+const showAlert = ref(false)
 const { snackbar, showSnackbar } = useSnackbar()
 const authStore = useAuthUserStore()
 
@@ -44,10 +44,9 @@ const { coords, locatedAt, resume, pause } = useGeolocation({
 // Map setup
 let map
 let marker
-const isSuperAdmin = authStore.userRole === 'Super Administrator';
+const isSuperAdmin = authStore.userRole === 'Super Administrator'
 const defaultLatLng = [8.95555279469484, 125.59780764933492]
 const isTrackingPause = ref(false)
-
 
 // Handle file selection
 const handleFileChange = (event) => {
@@ -168,8 +167,6 @@ watchEffect(() => {
     setMapMarker()
 })
 </script>
-
-
 
 <template>
   <v-card class="pa-4" elevation="2">

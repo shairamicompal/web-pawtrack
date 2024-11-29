@@ -5,107 +5,71 @@ import SideNavigation from '@/components/layout/navigation/SideNavigation.vue'
 import { ref, onMounted, computed } from 'vue'
 import { useDisplay } from 'vuetify'
 import { supabase } from '@/utils/supabase'
-import { useAuthUserStore } from '@/stores/authUser' // Import the store
+import { useAuthUserStore } from '@/stores/authUser'
+import { useReportsStore } from '@/stores/useReportsStore'
 
 const router = useRouter()
 
-// Utilize pre-defined Vue functions
 const { mobile } = useDisplay()
 const isDrawerVisible = ref(mobile.value ? false : true)
-const successMessageVisible = ref(false) // Success message state
+const successMessageVisible = ref(false)
 
-// Define reports as a reactive variable
-const reports = ref([])
-const selectedFilter = ref('ALL') // To track the current filter
-const isLoading = ref(true) // Loading state
-const authStore = useAuthUserStore() // Use the auth store to get user data
+const reportsStore = useReportsStore() // Use the reports store
+const authStore = useAuthUserStore()
 
-// Modal state for editing reports
+const reports = computed(() => reportsStore.reports) // Get reports from the store
+const selectedFilter = ref('ALL')
+const isLoading = ref(true)
 const isEditModalVisible = ref(false)
 const editingReport = ref(null)
 
-// Access the logged-in user's data from Pinia store
-const user = computed(() => authStore.userData) // Get the current logged-in user from the store
+const user = computed(() => authStore.userData)
 
-// Define the method to fetch image URLs
+// Add formAction to track form processing state
+const formAction = ref({
+  formProcess: false,  // Track the process state of the form (disabled or loading)
+})
+
 const getImageUrl = (path) => {
   return supabase.storage.from('pawtrack').getPublicUrl(path).data.publicUrl
 }
 
-// Computed property to filter reports based on the selected filter
 const filteredReports = computed(() => {
   if (selectedFilter.value === 'ALL') {
-    return reports.value // Show all reports
+    return reports.value
   }
   return reports.value.filter(
     (report) => report.pet_type?.trim().toUpperCase() === selectedFilter.value
-  ) // Case-insensitive match
+  )
 })
 
-// Fetch data from Supabase on mount
 onMounted(async () => {
-  const { data, error } = await supabase.from('pet_reports').select('*')
-  if (error) {
-    console.error('Error fetching reports:', error.message)
-  } else {
-    reports.value = data
-    console.log(
-      'Fetched reports:',
-      data.map((report) => report.pet_type)
-    ) // Debugging
-  }
-  isLoading.value = false // Stop loading once data is fetched
+  await reportsStore.fetchReports() // Fetch reports from the store
+  isLoading.value = false
 })
 
-// Remove report function
 const removeReport = async (id, user_id) => {
-  if (authStore.userData?.id === user_id) {
-    const { error } = await supabase.from('pet_reports').delete().eq('id', id)
-    if (error) {
-      console.error('Error removing report:', error.message)
-    } else {
-      reports.value = reports.value.filter((report) => report.id !== id)
-    }
-  } else {
-    alert('You do not have permission to delete this report.')
-  }
+  await reportsStore.removeReport(id, user_id, authStore) // Use store method to remove report
 }
 
-// Open edit modal and populate with report data
 const openEditModal = (report) => {
-  editingReport.value = { ...report } // Create a copy of the report to edit
+  editingReport.value = { ...report }
   isEditModalVisible.value = true
 }
 
-// Save changes to the report
 const saveReportChanges = async () => {
-  const updatedReport = editingReport.value
-  const { error } = await supabase
-    .from('pet_reports')
-    .update({
-      description: updatedReport.description,
-      contact_name: updatedReport.contact_name,
-      contact_num: updatedReport.contact_num,
-      contact_email: updatedReport.contact_email
-    })
-    .eq('id', updatedReport.id)
-
-  if (error) {
-    console.error('Error updating report:', error.message)
-  } else {
-    // Update the local data
-    const index = reports.value.findIndex((r) => r.id === updatedReport.id)
-    if (index !== -1) {
-      reports.value[index] = updatedReport
-    }
-
-    // Show the success message (snackbar)
-    successMessageVisible.value = true
-
-    isEditModalVisible.value = false // Close the modal
-  }
+  // Start the form process (disable the button and show loading spinner)
+  formAction.value.formProcess = true
+  
+  await reportsStore.saveReportChanges(editingReport.value) // Use store method to save changes
+  
+  // After saving, show success message and reset the form process state
+  successMessageVisible.value = true
+  isEditModalVisible.value = false
+  formAction.value.formProcess = false  // Stop the form process (re-enable the button)
 }
 </script>
+
 
 <template>
   <AppLayout
@@ -238,7 +202,15 @@ const saveReportChanges = async () => {
               ></v-text-field>
             </v-card-text>
             <v-card-actions>
-              <v-btn color="primary" @click="saveReportChanges" class="rounded-lg"> Save </v-btn>
+              <v-btn
+                color="primary"
+                @click="saveReportChanges"
+                class="rounded-lg"
+                :disabled="formAction.formProcess"
+                :loading="formAction.formProcess"
+              >
+                Save
+              </v-btn>
               <v-btn color="grey" @click="isEditModalVisible = false" class="rounded-lg">
                 Cancel
               </v-btn>
