@@ -3,9 +3,9 @@ import { dogIcon, catIcon, userLocationIcon } from './form-pet/leafletIcons';
 import leaflet from 'leaflet';
 import { ref, onMounted, watchEffect } from 'vue';
 import { useGeolocation } from '@vueuse/core';
-import { supabase } from '@/utils/supabase';
 import { useAuthUserStore } from '@/stores/authUser';
 import { useSnackbar } from './form-pet/useSnackbar';
+import { useSupabaseStore } from '@/stores/supabaseStore'; // Import the Supabase store
 import {
   requiredValidator,
   emailValidator,
@@ -14,7 +14,9 @@ import {
   descriptionValidator
 } from '@/utils/validators';
 
-// Define reactive properties
+// Supabase store
+const { fetchReports, uploadImage, insertReport } = useSupabaseStore();
+
 const showAlert = ref(false);
 const { snackbar, showSnackbar } = useSnackbar();
 const authStore = useAuthUserStore();
@@ -36,7 +38,6 @@ const isSuperAdmin = authStore.userRole === 'Super Administrator';
 const defaultLatLng = [8.95555279469484, 125.59780764933492];
 const isTrackingPause = ref(false);
 
-// Modal and Form Data
 const showModal = ref(false);
 const formData = ref({
   report_type: '',
@@ -52,13 +53,10 @@ const formData = ref({
   user_id: authStore.userData?.id || ''
 });
 const selectedFile = ref(null);
-
-// Form validation state
 const isFormValid = ref(false);
 const reportForm = ref(null);
 
-// Now, replace the snackbar handling code with showSnackbar
-const validateAndSubmit = () => {
+const validateAndSubmit = async () => {
   const isValid =
     requiredValidator(formData.value.report_type) &&
     requiredValidator(formData.value.pet_type) &&
@@ -69,131 +67,34 @@ const validateAndSubmit = () => {
     imageValidator(selectedFile.value);
 
   if (isValid) {
-    submitReport();
+    try {
+      formAction.value.formProcess = true;
+      const imagePath = selectedFile.value ? await uploadImage(selectedFile.value) : null;
+      if (imagePath) formData.value.image_path = imagePath;
+
+      await insertReport(formData.value);
+
+      showSnackbar('Report submitted successfully!', 'success');
+      leaflet
+        .marker([formData.value.latitude, formData.value.longitude], {
+          icon: formData.value.pet_type === 'Dog' ? dogIcon : catIcon
+        })
+        .addTo(map)
+        .bindPopup(
+          `<strong>${formData.value.pet_type}</strong> - <strong>${formData.value.report_type}</strong>`
+        )
+        .openPopup();
+      resetForm();
+    } catch (err) {
+      showSnackbar(err.message, 'error');
+    } finally {
+      formAction.value.formProcess = false;
+    }
   } else {
     showSnackbar('Please fill in all required fields.', 'error');
   }
 };
 
-// Toggle Geolocation Tracking
-const onTrackingPause = () => {
-  isTrackingPause.value = !isTrackingPause.value;
-
-  if (isTrackingPause.value) {
-    pause();
-    map.setView(defaultLatLng, 15);
-  } else {
-    resume();
-    setMapMarker();
-  }
-};
-
-// Set marker on map
-const setMapMarker = () => {
-  const newLatLng = [coords.value.latitude, coords.value.longitude];
-
-  if (coords.value.latitude && coords.value.longitude) {
-    map.setView(newLatLng, 17);
-    marker.setLatLng(newLatLng).openPopup();
-  }
-};
-
-// Add pin on map click
-const onMapClick = (e) => {
-  formData.value.latitude = e.latlng.lat;
-  formData.value.longitude = e.latlng.lng;
-  showModal.value = true;
-};
-
-// Handle file selection
-const handleFileChange = (event) => {
-  selectedFile.value = event.target.files[0];
-};
-
-// Upload image to Supabase Storage
-async function uploadImage(file) {
-  const fileName = `reports/${file.name}`;
-
-  const { data, error } = await supabase.storage.from('pawtrack').upload(fileName, file, {
-    cacheControl: '3600',
-    upsert: true
-  });
-
-  if (error) {
-    console.error('Error uploading image:', error.message);
-    return null;
-  }
-
-  return data.path;
-}
-
-// Fetch existing reports and add markers on the map
-const fetchReports = async () => {
-  try {
-    const { data: reports, error } = await supabase.from('pet_reports').select('*');
-    if (error) {
-      console.error('Error fetching reports:', error.message);
-      return;
-    }
-
-    map.eachLayer((layer) => {
-      if (layer instanceof leaflet.Marker && layer !== marker) {
-        map.removeLayer(layer);
-      }
-    });
-
-    reports.forEach((report) => {
-      const petIcon = report.pet_type === 'Dog' ? dogIcon : catIcon;
-
-      leaflet
-        .marker([report.latitude, report.longitude], { icon: petIcon })
-        .addTo(map)
-        .bindPopup(
-          `<strong>${report.pet_type}</strong> - <strong>${report.report_type}</strong><br>${report.description}`
-        );
-    });
-  } catch (err) {
-    console.error('Unexpected error fetching reports:', err);
-  }
-};
-
-// Submit report to the database
-const submitReport = async () => {
-  formAction.value.formProcess = true;
-  formAction.value.formSuccessMessage = '';
-  formAction.value.formErrorMessage = '';
-
-  try {
-    if (!authStore.userData?.id) {
-      throw new Error('You must be logged in to submit a report.');
-    }
-
-    const imagePath = selectedFile.value ? await uploadImage(selectedFile.value) : null;
-    if (imagePath) formData.value.image_path = imagePath;
-
-    const { error } = await supabase.from('pet_reports').insert([formData.value]);
-    if (error) throw new Error('Failed to submit report. Please try again.');
-
-    showSnackbar('Report submitted successfully!', 'success');
-  } catch (err) {
-    showSnackbar(err.message, 'error');
-  } finally {
-    formAction.value.formProcess = false;
-    leaflet
-      .marker([formData.value.latitude, formData.value.longitude], {
-        icon: formData.value.pet_type === 'Dog' ? dogIcon : catIcon
-      })
-      .addTo(map)
-      .bindPopup(
-        `<strong>${formData.value.pet_type}</strong> - <strong>${formData.value.report_type}</strong>`
-      )
-      .openPopup();
-
-    resetForm();
-  }
-};
-
-// Reset the form after submission
 const resetForm = () => {
   formData.value = {
     report_type: '',
@@ -212,6 +113,31 @@ const resetForm = () => {
   showModal.value = false;
 };
 
+const setMapMarker = () => {
+  const newLatLng = [coords.value.latitude, coords.value.longitude];
+  if (coords.value.latitude && coords.value.longitude) {
+    map.setView(newLatLng, 17);
+    marker.setLatLng(newLatLng).openPopup();
+  }
+};
+
+const onMapClick = (e) => {
+  formData.value.latitude = e.latlng.lat;
+  formData.value.longitude = e.latlng.lng;
+  showModal.value = true;
+};
+
+const onTrackingPause = () => {
+  isTrackingPause.value = !isTrackingPause.value;
+  if (isTrackingPause.value) {
+    pause();
+    map.setView(defaultLatLng, 15);
+  } else {
+    resume();
+    setMapMarker();
+  }
+};
+
 watchEffect(() => {
   if (
     coords.value.latitude !== Number.POSITIVE_INFINITY &&
@@ -220,7 +146,6 @@ watchEffect(() => {
     setMapMarker();
 });
 
-// Initialize the map and markers on mount
 onMounted(async () => {
   map = leaflet.map('map').setView(defaultLatLng, 15);
 
@@ -231,14 +156,26 @@ onMounted(async () => {
     })
     .addTo(map);
 
-  // Update the "You are here!" marker with the new custom icon
   marker = leaflet
     .marker(defaultLatLng, { icon: userLocationIcon })
     .addTo(map)
     .bindPopup('You are here!');
 
   map.on('click', onMapClick);
-  fetchReports();
+  try {
+    const reports = await fetchReports();
+    reports.forEach((report) => {
+      const petIcon = report.pet_type === 'Dog' ? dogIcon : catIcon;
+      leaflet
+        .marker([report.latitude, report.longitude], { icon: petIcon })
+        .addTo(map)
+        .bindPopup(
+          `<strong>${report.pet_type}</strong> - <strong>${report.report_type}</strong><br>${report.description}`
+        );
+    });
+  } catch (err) {
+    console.error('Error fetching reports:', err.message);
+  }
 });
 </script>
 
