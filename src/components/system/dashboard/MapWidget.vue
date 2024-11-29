@@ -156,7 +156,9 @@ const fetchReports = async () => {
       leaflet
         .marker([report.latitude, report.longitude], { icon: petIcon })
         .addTo(map)
-        .bindPopup(`${report.pet_type} - ${report.report_type}<br>${report.description}`)
+        .bindPopup(
+          `<strong>${report.pet_type}</strong> - <strong>${report.report_type}</strong><br>${report.description}`
+        )
     })
   } catch (err) {
     console.error('Unexpected error fetching reports:', err)
@@ -189,7 +191,9 @@ const submitReport = async () => {
         icon: formData.value.pet_type === 'Dog' ? dogIcon : catIcon
       })
       .addTo(map)
-      .bindPopup(`${formData.value.pet_type} - ${formData.value.report_type}`)
+      .bindPopup(
+        `<strong>${formData.value.pet_type}</strong> - <strong>${formData.value.report_type}</strong>`
+      )
       .openPopup()
 
     resetForm()
@@ -228,6 +232,14 @@ const catIcon = leaflet.icon({
   popupAnchor: [0, -32]
 })
 
+// Define the custom icon for the "You are here!" marker
+const userLocationIcon = leaflet.icon({
+  iconUrl: 'images/pin-loc.png',
+  iconSize: [48, 50],
+  iconAnchor: [16, 32],
+  popupAnchor: [0, -32]
+})
+
 watchEffect(() => {
   if (
     coords.value.latitude !== Number.POSITIVE_INFINITY &&
@@ -236,6 +248,7 @@ watchEffect(() => {
     setMapMarker()
 })
 
+// In the onMounted function, update the marker for "You are here!"
 onMounted(async () => {
   map = leaflet.map('map').setView(defaultLatLng, 15)
 
@@ -246,14 +259,16 @@ onMounted(async () => {
     })
     .addTo(map)
 
-  marker = leaflet.marker(defaultLatLng).addTo(map).bindPopup('You are here!')
+  // Update the "You are here!" marker with the new custom icon
+  marker = leaflet
+    .marker(defaultLatLng, { icon: userLocationIcon })
+    .addTo(map)
+    .bindPopup('You are here!')
 
   map.on('click', onMapClick)
   fetchReports()
 })
 </script>
-
-
 
 <template>
   <v-card class="pa-4" elevation="2">
