@@ -4,7 +4,8 @@ import { ref, onMounted, watchEffect } from 'vue'
 import { useGeolocation } from '@vueuse/core'
 import { supabase } from '@/utils/supabase'
 import { useAuthUserStore } from '@/stores/authUser'
-import { useRouter } from 'vue-router'
+
+import { useSnackbar } from './form-pet/useSnackbar'
 
 import {
   requiredValidator,
@@ -16,9 +17,9 @@ import {
 
 // Define reactive properties
 const showAlert = ref(false)
-const alertMessage = ref('')
-const alertType = ref('success')
-const router = useRouter()
+
+// Initialize the snackbar composable
+const { snackbar, showSnackbar } = useSnackbar()
 
 // Use Pinia Store
 const authStore = useAuthUserStore()
@@ -65,17 +66,8 @@ const selectedFile = ref(null)
 const isFormValid = ref(false)
 const reportForm = ref(null)
 
-// Snackbar state
-const snackbar = ref({
-  visible: false,
-  message: '',
-  color: 'success',
-  timeout: 3000
-})
-
-// Validate and submit the form
+// Now, replace the snackbar handling code with showSnackbar
 const validateAndSubmit = () => {
-  // Check if required fields are valid
   const isValid =
     requiredValidator(formData.value.report_type) &&
     requiredValidator(formData.value.pet_type) &&
@@ -88,10 +80,7 @@ const validateAndSubmit = () => {
   if (isValid) {
     submitReport()
   } else {
-    // If validation fails, show an error snackbar
-    snackbar.value.visible = true
-    snackbar.value.color = 'error'
-    snackbar.value.message = 'Please fill in all required fields.'
+    showSnackbar('Please fill in all required fields.', 'error')
   }
 }
 
@@ -190,9 +179,11 @@ const submitReport = async () => {
     const { error } = await supabase.from('pet_reports').insert([formData.value])
     if (error) throw new Error('Failed to submit report. Please try again.')
 
-    snackbar.value = { visible: true, color: 'success', message: 'Report submitted successfully!' }
-    formAction.value.formSuccessMessage = snackbar.value.message
-
+    showSnackbar('Report submitted successfully!', 'success')
+  } catch (err) {
+    showSnackbar(err.message, 'error')
+  } finally {
+    formAction.value.formProcess = false
     leaflet
       .marker([formData.value.latitude, formData.value.longitude], {
         icon: formData.value.pet_type === 'Dog' ? dogIcon : catIcon
@@ -202,12 +193,6 @@ const submitReport = async () => {
       .openPopup()
 
     resetForm()
-  } catch (err) {
-    console.error('Error:', err.message)
-    snackbar.value = { visible: true, color: 'error', message: err.message }
-    formAction.value.formErrorMessage = err.message
-  } finally {
-    formAction.value.formProcess = false
   }
 }
 
@@ -267,6 +252,8 @@ onMounted(async () => {
   fetchReports()
 })
 </script>
+
+
 
 <template>
   <v-card class="pa-4" elevation="2">
