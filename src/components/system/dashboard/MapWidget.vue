@@ -26,6 +26,17 @@ const formAction = ref({
   formProcess: false
 });
 
+const handleFileChange = (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    selectedFile.value = file;
+    showSnackbar('File selected successfully.', 'success');
+  } else {
+    showSnackbar('No file selected.', 'error');
+  }
+};
+
+
 const { coords, locatedAt, resume, pause } = useGeolocation({
   enableHighAccuracy: true,
   timeout: 10000,
