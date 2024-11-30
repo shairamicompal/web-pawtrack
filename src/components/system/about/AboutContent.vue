@@ -44,74 +44,74 @@ export default {
 </script>
 
 <template>
-  <v-container>
-    <v-row>
-      <!-- Left Column for Desktop (hidden on mobile) -->
-      <v-col cols="12" lg="6">
-        <div class="about-title-wrapper">
-          <v-icon class="icon">mdi-paw</v-icon>
-          <h3 class="about-title">ABOUT</h3>
-          <div class="line"></div>
-        </div>
-        <v-img
-          src="/images/pet.png"
-          class="about-image move-up"
-          alt="Background Image"
-          cover
-        ></v-img>
-      </v-col>
+ <v-container fluid>
+  <v-row>
+    <!-- Left Column for Desktop -->
+    <v-col cols="12" md="6" lg="6">
+      <div class="about-title-wrapper">
+        <v-icon class="icon">mdi-paw</v-icon>
+        <h3 class="about-title">ABOUT</h3>
+        <div class="line"></div>
+      </div>
+      <v-img
+        src="/images/pet.png"
+        class="about-image move-up"
+        alt="Background Image"
+        cover
+      ></v-img>
+    </v-col>
 
-      <v-col>
-        <h2 class="text-center mt-4">
-          Why choose <span class="typed-text">{{ typedText }}</span>
-        </h2>
+    <!-- Right Column -->
+    <v-col cols="12" md="6" lg="6">
+      <h2 class="text-center mt-10">
+        Why choose <span class="typed-text">{{ typedText }}</span>
+      </h2>
 
-        <v-row class="text-center mt-8">
-          <v-col>
-            <v-avatar color="#4E342E" size="56" class="icon-about">
-              <v-icon size="30" color="white" class="text-center">mdi-map-marker-radius</v-icon>
-            </v-avatar>
-            <v-card-title class="mt-2">Pin Location of Pets</v-card-title>
-            <v-card-text>
-              Easily pin the exact location where you found or lost your pet.
-            </v-card-text>
-          </v-col>
-          <v-col>
-            <v-avatar color="#4E342E" size="56" class="icon-about">
-              <v-icon size="30" color="white  ">mdi-camera</v-icon>
-            </v-avatar>
-            <v-card-title class="mt-2">Photo Sharing</v-card-title>
-            <v-card-text>
-              Upload photos of found or lost pets to help identify them and share crucial details.
-            </v-card-text>
-          </v-col>
-        </v-row>
+      <v-row class="text-center mt-8">
+        <v-col cols="12" sm="6">
+          <v-avatar color="#4E342E" size="56" class="icon-about">
+            <v-icon size="30" color="white" class="text-center">mdi-map-marker-radius</v-icon>
+          </v-avatar>
+          <v-card-title class="mt-2">Pin Location of Pets</v-card-title>
+          <v-card-text>
+            Easily pin the exact location where you found or lost your pet.
+          </v-card-text>
+        </v-col>
+        <v-col cols="12" sm="6">
+          <v-avatar color="#4E342E" size="56" class="icon-about">
+            <v-icon size="30" color="white">mdi-camera</v-icon>
+          </v-avatar>
+          <v-card-title class="mt-2">Photo Sharing</v-card-title>
+          <v-card-text>
+            Upload photos of found or lost pets to help identify them and share crucial details.
+          </v-card-text>
+        </v-col>
+      </v-row>
 
-        <v-row class="text-center">
-          <v-col>
-            <v-avatar color="#4E342E" size="56" class="icon-about">
-              <v-icon size="30" color="white  ">mdi-account-circle</v-icon>
-            </v-avatar>
-            <v-card-title class="mt-2">User Profiles</v-card-title>
-            <v-card-text>
-              Create a profile to connect with other users and easily manage your pet sightings and
-              posts.
-            </v-card-text>
-          </v-col>
-          <v-col>
-            <v-avatar color="#4E342E" size="56" class="icon-about">
-              <v-icon size="30" color="white  ">mdi-dog</v-icon>
-            </v-avatar>
-            <v-card-title class="mt-2">Reunite Pets</v-card-title>
-            <v-card-text>
-              Help reunite lost pets with their families by posting accurate location information
-              and descriptions.
-            </v-card-text>
-          </v-col>
-        </v-row>
-      </v-col>
-    </v-row>
-  </v-container>
+      <v-row class="text-center">
+        <v-col cols="12" sm="6">
+          <v-avatar color="#4E342E" size="56" class="icon-about">
+            <v-icon size="30" color="white">mdi-account-circle</v-icon>
+          </v-avatar>
+          <v-card-title class="mt-2">User Profiles</v-card-title>
+          <v-card-text>
+            Create a profile to connect with other users and easily manage your pet sightings and posts.
+          </v-card-text>
+        </v-col>
+        <v-col cols="12" sm="6">
+          <v-avatar color="#4E342E" size="56" class="icon-about">
+            <v-icon size="30" color="white">mdi-dog</v-icon>
+          </v-avatar>
+          <v-card-title class="mt-2">Reunite Pets</v-card-title>
+          <v-card-text>
+            Help reunite lost pets with their families by posting accurate location information and descriptions.
+          </v-card-text>
+        </v-col>
+      </v-row>
+    </v-col>
+  </v-row>
+</v-container>
+
 </template>
 
 

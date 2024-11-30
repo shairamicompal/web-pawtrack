@@ -2,6 +2,8 @@
 import AppLayout from '@/components/layout/AppLayout.vue'
 import SideNavigation from '@/components/layout/navigation/SideNavigation.vue'
 import AboutContent from '@/components/system/about/AboutContent.vue'
+import AboutFaqs from '@/components/system/about/AboutFaqs.vue'
+import AboutCounts from '@/components/system/about/AboutCounts.vue'
 
 import { ref } from 'vue'
 import { useDisplay } from 'vuetify'
@@ -31,6 +33,22 @@ const isDrawerVisible = ref(mobile.value ? false : true)
             <v-col cols="12">
               <AboutContent></AboutContent>
             </v-col>
+         </v-row>
+
+         <v-row>
+           <v-col cols="12">
+              <AboutCounts></AboutCounts>
+           </v-col>
+         </v-row>
+
+         <v-row>
+           <v-col cols="12">
+            <AboutFaqs></AboutFaqs>
+           </v-col>
+         </v-row>
+              
+         <v-row>
+
          </v-row>
      </v-container>
     </template>

@@ -26,4 +26,39 @@ export const formActionDefault = {
   formSuccessMessage: ''
 }
 
+export async function fetchReportCounts() {
+  try {
+    // Fetch total count
+    const { count: total, error: totalError } = await supabase
+      .from('pet_reports')
+      .select('*', { count: 'exact' });
 
+    if (totalError) throw new Error(`Total Error: ${totalError.message}`);
+
+    // Fetch dog count
+    const { count: dogs, error: dogError } = await supabase
+      .from('pet_reports')
+      .select('*', { count: 'exact' })
+      .ilike('pet_type', 'dog'); // Case-insensitive
+
+    if (dogError) throw new Error(`Dog Error: ${dogError.message}`);
+
+    // Fetch cat count
+    const { count: cats, error: catError } = await supabase
+      .from('pet_reports')
+      .select('*', { count: 'exact' })
+      .ilike('pet_type', 'cat'); // Case-insensitive
+
+    if (catError) throw new Error(`Cat Error: ${catError.message}`);
+
+    // Return all counts
+    return {
+      total: total || 0,
+      dogs: dogs || 0,
+      cats: cats || 0,
+    };
+  } catch (error) {
+    console.error('Error fetching report counts:', error.message || error);
+    return { total: 0, dogs: 0, cats: 0 }; // Fallback
+  }
+}
