@@ -6,6 +6,7 @@ import NotFoundView from '@/views/errors/NotFoundView.vue'
 import AccountSettingsView from '@/views/system/AccountSettingsView.vue'
 import AboutView from '@/views/system/AboutView.vue'
 import ReportsPageView from '@/views/system/ReportsPageView.vue'
+import ContactView from '@/views/system/ContactView.vue'
 // import ReportPostView from '@/views/system/ReportPostView.vue'
 
 // 👉 Routes
@@ -45,6 +46,12 @@ export const routesPath = [
     path: '/reports',
     name: 'reports',
     component: ReportsPageView,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/contact-us',
+    name: 'contact-us',
+    component: ContactView,
     meta: { requiresAuth: true }
   },
   {
