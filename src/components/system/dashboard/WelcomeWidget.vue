@@ -10,7 +10,7 @@ const { mdAndDown } = useDisplay()
 </script>
 
 <template>
-  <v-card theme="light">
+  <v-card class="custom-card" theme="light">
     <v-card-text>
       <v-row>
         <v-col cols="12" sm="4" :class="mdAndDown ? 'd-flex align-center' : ''">
@@ -41,3 +41,9 @@ const { mdAndDown } = useDisplay()
     </v-card-text>
   </v-card>
 </template>
+
+<style scoped>
+.custom-card {
+  background-color:#f2e7d1; /* Yellow lighten-4 */
+}
+</style>
