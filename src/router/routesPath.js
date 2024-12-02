@@ -8,6 +8,7 @@ import AboutView from '@/views/system/AboutView.vue'
 import ReportsPageView from '@/views/system/ReportsPageView.vue'
 import ContactView from '@/views/system/ContactView.vue'
 import GuideView from '@/views/system/GuideView.vue'
+import PetFactsView from '@/views/system/PetFactsView.vue'
 // import ReportPostView from '@/views/system/ReportPostView.vue'
 
 // 👉 Routes
@@ -47,6 +48,12 @@ export const routesPath = [
     path: '/reports',
     name: 'reports',
     component: ReportsPageView,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/pet-facts',
+    name: 'pet-facts',
+    component: PetFactsView,
     meta: { requiresAuth: true }
   },
   {
