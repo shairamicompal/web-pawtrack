@@ -30,7 +30,7 @@ const getIconColor = (fact) => {
 <template>
   <div class="about-title-wrapper mt-5 ms-5">
     <v-icon class="icon">mdi-paw</v-icon>
-    <h4 class="about-title">CONTACT</h4>
+    <h4 class="about-title">PET FACTS</h4>
     <div class="line"></div>
   </div>
   <v-container fluid>
