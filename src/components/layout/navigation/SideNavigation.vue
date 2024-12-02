@@ -35,7 +35,7 @@ function generateRoute(title) {
     v-model="isDrawerVisible"
     :temporary="mobile"
     :permanent="!mobile"
-    width="325"
+    width="250"
   >
     <v-list density="compact" nav>
       <v-list-item

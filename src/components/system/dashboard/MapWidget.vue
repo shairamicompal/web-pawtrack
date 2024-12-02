@@ -324,7 +324,7 @@ watchEffect(() => {
           <h4 class="text-center">Pet Reports</h4>
           <v-row class="pt-2 text-center" justify="space-around">
             <!-- Lost Dogs -->
-            <v-col cols="12" lg="12" sm="6" class="d-flex justify-center align-center">
+            <v-col cols="12" lg="6" sm="6" class="d-flex justify-center align-center">
               <v-avatar color="brown" size="40">
                 <v-icon>mdi-dog</v-icon>
               </v-avatar>
@@ -335,7 +335,7 @@ watchEffect(() => {
             </v-col>
 
             <!-- Found Dogs -->
-            <v-col cols="12" lg="12" sm="6" class="d-flex justify-center align-center">
+            <v-col cols="12" lg="6" sm="6" class="d-flex justify-center align-center">
               <v-avatar color="blue" size="40">
                 <v-icon>mdi-dog</v-icon>
               </v-avatar>
@@ -346,7 +346,7 @@ watchEffect(() => {
             </v-col>
 
             <!-- Lost Cats -->
-            <v-col cols="12" lg="12" sm="6" class="d-flex justify-center align-center">
+            <v-col cols="12" lg="6" sm="6" class="d-flex justify-center align-center">
               <v-avatar color="orange" size="40">
                 <v-icon>mdi-cat</v-icon>
               </v-avatar>
@@ -357,7 +357,7 @@ watchEffect(() => {
             </v-col>
 
             <!-- Found Cats -->
-            <v-col cols="12" lg="12" sm="6" class="d-flex justify-center align-center">
+            <v-col cols="12" lg="6" sm="6" class="d-flex justify-center align-center">
               <v-avatar color="green" size="40">
                 <v-icon>mdi-cat</v-icon>
               </v-avatar>
