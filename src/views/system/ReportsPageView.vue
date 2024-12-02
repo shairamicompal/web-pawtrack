@@ -27,7 +27,7 @@ const user = computed(() => authStore.userData)
 
 // Add formAction to track form processing state
 const formAction = ref({
-  formProcess: false,  // Track the process state of the form (disabled or loading)
+  formProcess: false // Track the process state of the form (disabled or loading)
 })
 
 const getImageUrl = (path) => {
@@ -60,16 +60,15 @@ const openEditModal = (report) => {
 const saveReportChanges = async () => {
   // Start the form process (disable the button and show loading spinner)
   formAction.value.formProcess = true
-  
+
   await reportsStore.saveReportChanges(editingReport.value) // Use store method to save changes
-  
+
   // After saving, show success message and reset the form process state
   successMessageVisible.value = true
   isEditModalVisible.value = false
-  formAction.value.formProcess = false  // Stop the form process (re-enable the button)
+  formAction.value.formProcess = false // Stop the form process (re-enable the button)
 }
 </script>
-
 
 <template>
   <AppLayout
@@ -81,6 +80,11 @@ const saveReportChanges = async () => {
     </template>
 
     <template #content>
+      <div class="about-title-wrapper mt-10 ms-10">
+        <v-icon class="icon">mdi-paw</v-icon>
+        <h4 class="about-title">REPORTS</h4>
+        <div class="line"></div>
+      </div>
       <v-container>
         <v-row>
           <v-col cols="12" class="text-center mb-4">
@@ -88,7 +92,7 @@ const saveReportChanges = async () => {
               v-for="filter in ['ALL', 'DOG', 'CAT']"
               :key="filter"
               class="ma-2"
-              :color="selectedFilter === filter ? 'primary' : 'secondary'"
+              :color="selectedFilter === filter ? 'blue-grey-darken-3' : 'blue-grey-lighten-1'"
               @click="selectedFilter = filter"
             >
               {{ filter === 'ALL' ? 'All Reports' : `${filter} Reports` }}
@@ -112,17 +116,20 @@ const saveReportChanges = async () => {
 
         <v-row v-else>
           <v-col cols="12" sm="4" md="4" v-for="report in filteredReports" :key="report.id">
-            <v-card class="mx-auto my-4" max-width="400" outlined elevation="10" hover>
+            <v-card class="mx-auto" max-width="400" outlined elevation="10" hover>
               <v-img
                 :src="getImageUrl(report.image_path)"
                 height="250px"
                 contain
                 class="rounded-lg"
               />
-              <v-card-title class="text-h6 font-weight-bold text-center">
+              <v-card-title class="text-h5 font-weight-bold text-center">
                 {{ report.pet_type }} - {{ report.report_type }}
               </v-card-title>
-              <v-card-subtitle class="text-body-2 text-uppercase font-weight-bold" color="primary">
+              <v-card-subtitle
+                class="text-body-2 text-uppercase font-weight-bold"
+                color="amber-lighten-2"
+              >
                 {{ report.date }}
               </v-card-subtitle>
               <v-card-text>
@@ -240,7 +247,20 @@ const saveReportChanges = async () => {
 </template>
 
 <style scoped>
+.v-row {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.v-col {
+  display: flex;
+}
+
 .v-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%; /* Ensure cards take the full height */
   transition:
     transform 0.3s ease-in-out,
     box-shadow 0.3s ease;
@@ -261,11 +281,30 @@ const saveReportChanges = async () => {
   font-size: 14px;
 }
 
-.v-card-actions .v-btn {
-  transition: background-color 0.3s ease;
+.v-card-actions {
+  margin-top: auto; /* Push actions to the bottom */
 }
 
-.v-card-actions .v-btn:hover {
-  background-color: #f0f0f0;
+.about-title-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+.icon {
+  font-size: 30px; /* Adjust icon size */
+  color: #ab8333; /* Icon color */
+  margin-right: 3px; /* Space between icon and text */
+}
+
+.about-title {
+  font-weight: bold;
+  font-size: 18px;
+  margin-right: 10px;
+}
+
+.line {
+  flex-grow: 0.20;
+  height: 2px; /* Adjust thickness */
+  background-color: #d18f2c; /* Line color */
 }
 </style>
