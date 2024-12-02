@@ -17,25 +17,25 @@ const { mdAndDown } = useDisplay()
           <v-img
             :class="!mdAndDown ? 'mx-auto' : ''"
             src="/images/pawtrack-logo.png"
-            :width="mdAndDown ? '80%' : '60%'"
+            :width="mdAndDown ? '48%' : '48%'"
           ></v-img>
         </v-col>
 
         <v-col cols="12" sm="8">
-          <h2 class="mb-5">
+          <h1 class="mb-5">
             Welcome Aboard,
             <span class="font-weight-black">
               {{ authStore.userData.firstname + ' ' + authStore.userData.lastname }}!
             </span>
-          </h2>
+          </h1>
 
-          <p class="text-justify">
+          <h4 class="text-justify">
             Welcome to PawTrack! Our system is designed to help you easily report and locate lost or
             found pets in your community. Here, you can share information about a missing or found pet, including descriptions,
             photos, and the last known location. PawTrack makes it simple to reunite lost pets with
             their families. Thank you for choosing us to help bring pets back home—because every pet
             deserves to be found.
-          </p>
+          </h4>
         </v-col>
       </v-row>
     </v-card-text>

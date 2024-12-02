@@ -233,20 +233,20 @@ watchEffect(() => {
 
       <!-- Current Location Section -->
       <v-col cols="12" md="9">
-        <v-card class="pa-4" elevation="2">
+        <v-card class="pa-1" elevation="2">
           <v-row align="center">
-            <v-col lg="5">
+            <v-col lg="4" class="ml-10">
               <v-icon color="primary" class="me-1" size="18">mdi-map-marker</v-icon>
               <span class="coords">{{ `LatLng: ${coords.latitude}, ${coords.longitude}` }}</span>
             </v-col>
-            <v-col lg="6">
+            <v-col lg="5" class="mr-10">
               <v-icon color="secondary" class="me-2" size="18">mdi-clock</v-icon>
               <span class="timestamp">{{
                 `Date/Time: ${new Date(locatedAt).toLocaleString()}`
               }}</span>
             </v-col>
 
-            <v-col lg="1">
+            <v-col lg="2" class="mr-1" >
               <v-btn @click="onTrackingPause" variant="text" icon>
                 <v-icon
                   :icon="isTrackingPause ? 'mdi-refresh' : 'mdi-pause'"
