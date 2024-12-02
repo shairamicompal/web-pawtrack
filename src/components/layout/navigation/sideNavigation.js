@@ -3,7 +3,7 @@ export const mainNav = [
   ['About', 'mdi-account'],
   ['Reports', 'mdi-pencil'],
   ['Pet facts', 'mdi-paw'],
-  ['Help & FAQS', 'mdi-comment-question'],
+  ['Guide', 'mdi-comment-question'],
   ['Contact Us', 'mdi-phone']
 ]
 
