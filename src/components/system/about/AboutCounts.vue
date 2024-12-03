@@ -21,7 +21,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <v-container>
+  <v-container fluid>
     <v-row justify="space-around" class="stats-section">
       <v-col cols="12" sm="6" md="4" lg="3">
         <v-card class="stat-card" outlined>

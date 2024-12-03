@@ -87,7 +87,7 @@ const saveReportChanges = async () => {
       </div>
       <v-container>
         <v-row>
-          <v-col cols="12" class="text-center mb-4">
+          <v-col cols="12" lg="12" class="text-center mb-4">
             <v-btn
               v-for="filter in ['ALL', 'DOG', 'CAT']"
               :key="filter"
