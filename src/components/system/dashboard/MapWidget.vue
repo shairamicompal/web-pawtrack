@@ -33,12 +33,15 @@ const { formData, resetFormData } = useFormData(authStore)
 
 const showModal = ref(false)
 const selectedFile = ref(null)
-const isFormValid = ref(false)
+const isFormValid = ref(true) // Start with valid form state
 const formAction = ref({
   formSuccessMessage: '',
   formErrorMessage: '',
   formProcess: false
 })
+
+const isFormSubmitted = ref(false) // New state to track submission
+const isTrackingPause = ref(false)
 
 // Geolocation
 const { coords, locatedAt, resume, pause } = useGeolocation({
@@ -52,7 +55,6 @@ let map
 let marker
 const isSuperAdmin = authStore.userRole === 'Super Administrator'
 const defaultLatLng = [8.95555279469484, 125.59780764933492]
-const isTrackingPause = ref(false)
 
 // Handle file selection
 const handleFileChange = (event) => {
@@ -122,7 +124,11 @@ const validateAndSubmit = async () => {
         )
         .openPopup()
 
+      // Reset the form after successful submission
       resetForm()
+
+      // Ensure validation messages are cleared after submission
+      isFormSubmitted.value = true
     } catch (err) {
       showSnackbar(err.message, 'error')
     } finally {
@@ -130,6 +136,8 @@ const validateAndSubmit = async () => {
     }
   } else {
     showSnackbar('Please fill in all required fields.', 'error')
+    // Make sure validation state is reset here
+    isFormValid.value = false
   }
 }
 
@@ -137,6 +145,10 @@ const resetForm = () => {
   resetFormData()
   selectedFile.value = null
   showModal.value = false
+  showAlert.value = false
+  isFormValid.value = true
+  formData.value = {} // Clear form data object
+  isFormSubmitted.value = false // Reset form submission state
 }
 
 // Pet report counts
@@ -246,7 +258,7 @@ watchEffect(() => {
               }}</span>
             </v-col>
 
-            <v-col lg="2" class="mr-1" >
+            <v-col lg="2" class="mr-1">
               <v-btn @click="onTrackingPause" variant="text" icon>
                 <v-icon
                   :icon="isTrackingPause ? 'mdi-refresh' : 'mdi-pause'"
