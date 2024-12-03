@@ -51,8 +51,8 @@ export const routesPath = [
     meta: { requiresAuth: true }
   },
   {
-    path: '/pet-facts',
-    name: 'pet-facts',
+    path: '/pet-tips-&-facts',
+    name: 'pet-tips-&-facts',
     component: PetFactsView,
     meta: { requiresAuth: true }
   },

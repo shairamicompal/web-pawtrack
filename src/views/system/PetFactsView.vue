@@ -1,6 +1,7 @@
 <script setup>
 import AppLayout from '@/components/layout/AppLayout.vue'
 import SideNavigation from '@/components/layout/navigation/SideNavigation.vue'
+import PetContent from '@/components/system/pet-facts/PetContent.vue'
 import PetFacts from '@/components/system/pet-facts/PetFacts.vue'
 
 
@@ -28,6 +29,13 @@ const isDrawerVisible = ref(mobile.value ? false : true)
 
     <template #content>
      <v-container fluid>
+
+          
+           <v-col cols="12">
+              <PetContent></PetContent>
+           </v-col>
+         
+
          <v-row>
             <v-col cols="12">
                 <PetFacts></PetFacts>

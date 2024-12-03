@@ -28,11 +28,6 @@ const getIconColor = (fact) => {
 </script>
 
 <template>
-  <div class="about-title-wrapper mt-5 ms-5">
-    <v-icon class="icon">mdi-paw</v-icon>
-    <h4 class="about-title">PET FACTS</h4>
-    <div class="line"></div>
-  </div>
   <v-container fluid>
     <!-- Search Bar -->
     <v-row class="search-bar" justify="center" align="center">
@@ -87,7 +82,7 @@ const getIconColor = (fact) => {
 }
 
 .search-field {
-  background: linear-gradient(90deg, #faca71, #ffc069);
+  background: linear-gradient(90deg, #f6f4f1, #f9f5f0);
   border-radius: 16px;
   font-size: 16px;
   color: #333;
@@ -113,7 +108,7 @@ const getIconColor = (fact) => {
 }
 
 .search-field:focus-within {
-  border: 2px solid #6c4811;
+  border: 2px solid #f1ddbf;
 }
 
 /* Facts Container */
@@ -128,7 +123,7 @@ const getIconColor = (fact) => {
 
 /* Card Styles */
 .fact-card {
-  background-color: #fbeec3;
+  background-color: #fffbec;
   border-radius: 12px;
   padding: 12px;
   transition:
@@ -170,28 +165,5 @@ const getIconColor = (fact) => {
 /* Background */
 body {
   background-color: #fffbf3;
-}
-
-.about-title-wrapper {
-  display: flex;
-  align-items: center;
-}
-
-.icon {
-  font-size: 30px; /* Adjust icon size */
-  color: #ab8333; /* Icon color */
-  margin-right: 3px; /* Space between icon and text */
-}
-
-.about-title {
-  font-weight: bold;
-  font-size: 18px;
-  margin-right: 10px;
-}
-
-.line {
-  flex-grow: 0.20;
-  height: 2px; /* Adjust thickness */
-  background-color: #d18f2c; /* Line color */
 }
 </style>
