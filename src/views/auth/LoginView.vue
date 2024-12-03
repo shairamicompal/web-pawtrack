@@ -45,12 +45,12 @@ const { mobile } = useDisplay()
                 <v-divider class="my-3"></v-divider>
 
                 <!-- Register Link -->
-                <!-- <h4 class="text-center">
+                <h4 class="text-center">
                   Don't have an account?
                   <router-link class="text-amber-accent-4 font-weight-black" to="/register">
                     Click here to Register
                   </router-link>
-                </h4> -->
+                </h4>
               </v-card-text>
             </v-card>
           </v-col>
