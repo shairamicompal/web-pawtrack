@@ -31,7 +31,7 @@ const toggleAccordion = (index) => {
 </script>
 
 <template>
-  <v-container fluid>
+  <v-container>
     <v-row>
       <!-- FAQ Section -->
       <v-col :cols="12" :md="6" :lg="6">
