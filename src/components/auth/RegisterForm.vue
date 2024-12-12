@@ -57,7 +57,7 @@ const onSubmit = async () => {
     console.log(data)
     formAction.value.formSuccessMessage = 'Successfully Registered Account.'
     // Add here more actions if you want
-    router.replace('/dashboard')
+    router.replace('/login')
   }
 
   refVForm.value?.reset()
